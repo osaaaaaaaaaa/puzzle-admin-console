@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,11 +26,22 @@ class AuthController extends Controller
     {
         route('login');
 
-        // バリデーションチェック
-        $validated = $request->validate([
-            'name' => ['required', 'min:4', 'max:20'],
-            'password' => ['required'],
-        ]); // エラー発生で自動で元のページへ戻る
+//        // バリデーションチェック
+//        $validated = $request->validate([
+//            'name' => ['required', 'min:4', 'max:20'],
+//            'password' => ['required'],
+//        ]); // エラー発生で自動で元のページへ戻る
+
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'min:4'],
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect("/")
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // レコードを取得
         $account = Account::where('name', '=', $request['name'])->get();
