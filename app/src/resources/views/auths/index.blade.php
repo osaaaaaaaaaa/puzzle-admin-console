@@ -13,14 +13,14 @@
                 <h1 class="fw-bold mb-0 fs-2">ログイン情報を入力</h1>
             </div>
             <div class="modal-body p-5 pt-0">
-                <form method="post" action="{{ url('/accounts/doLogin')}}">
+                <form method="post" action="{{ url('auths/doLogin')}}">
                     @csrf
                     <div class="form-floating mb-3">
                         <input type="text" name="name" value="@if(!empty($name)){{$name}}@endif"
                                class="form-control rounded-3"
                                id="floatingInput"
                                placeholder="ユーザー名:">
-                        <label for="floatingInput">ユーザー名</label>
+                        <label for="floatingInput">アカウント名</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="password" name="password" class="form-control rounded-3" id="floatingPassword"
@@ -30,11 +30,16 @@
                     <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">ログイン</button>
                     <label><input hidden="hidden" name="action" value="doLogin"></label>
                 </form>
-                @if(!empty($errors))
+                @if($errors->any())
                     <ul>
-                        @foreach($errors as $error)
-                            <li class="text-danger fw-bold">{{$error}}</li>
+                        @foreach($errors->all() as $text)
+                            <li class="text-danger fw-bold">{{$text}}</li>
                         @endforeach
+                    </ul>
+                @endif
+                @if(!empty($error))
+                    <ul>
+                        <li class="text-danger fw-bold">"パスワード"または"アカウント名"が異なります</li>
                     </ul>
                 @endif
             </div>
@@ -44,11 +49,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ja">
-<body>
 </body>
 </html>

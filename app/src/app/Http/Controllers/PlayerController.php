@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Player;
 use Illuminate\Http\Request;
 
 class PlayerController
@@ -9,43 +10,20 @@ class PlayerController
     // プレイヤー一覧表示
     public function index(Request $request)
     {
+        // 'login' セッションがあるかどうか
         if ($request->session()->has('login')) {
-            if (empty($request->player_name)) {
-                return view('players/index', ['dataList' => $this->getPlayerData()]);
-            } else {
-                dd($request->player_name);
+            // アカウント名の指定があるかどうか
+            if (empty($request->player_name)) {// 指定がない場合
+                // アカウントテーブルから全てのレコードを取得する
+                $players = Player::All();
+                return view('players/index', ['players' => $players]);
+            } else {// 指定がある場合
+                // 条件指定してレコードを取得する
+                $players = Player::where('player_name', '=', $request->player_name)->get();
+                return view('players/index', ['players' => $players]);
             }
         } else {
             return redirect('/');
         }
     }
-
-    // データ管理
-    public function getPlayerData()
-    {
-        return [
-            [
-                'id' => 1,
-                'player_name' => 'test01',
-                'level' => (int)rand(1, 100),
-                'exp' => (int)rand(1, 10000),
-                'life' => (int)rand(1, 10)
-            ],
-            [
-                'id' => 2,
-                'player_name' => 'test02',
-                'level' => (int)rand(1, 100),
-                'exp' => (int)rand(1, 10000),
-                'life' => (int)rand(1, 10)
-            ],
-            [
-                'id' => 3,
-                'player_name' => 'test03',
-                'level' => (int)rand(1, 100),
-                'exp' => (int)rand(1, 10000),
-                'life' => (int)rand(1, 10)
-            ],
-        ];
-    }
-
 }

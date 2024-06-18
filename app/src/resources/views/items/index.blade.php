@@ -11,7 +11,7 @@
         <a class="navbar-brand text-warning fw-bold fs-4" href="{{ url('home/index')}}">パズルゲーム管理サイト</a>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item"><a href="{{ url('accounts/index')}}" class="nav-link active">ユーザー</a></li>
+                <li class="nav-item"><a href="{{ url('accounts/index')}}" class="nav-link active">アカウント</a></li>
                 <li class="nav-item"><a href="{{ url('players/index')}}" class="nav-link active">プレイヤー</a></li>
                 <li class="nav-item"><a href="{{ url('items/index')}}" class="nav-link disabled">アイテム</a></li>
                 <li class="nav-item"><a href="{{ url('inventoryItems/index')}}"
@@ -19,7 +19,7 @@
                 </li>
             </ul>
             <button type="button" class="btn btn-outline-danger me-2"
-                    onclick="location.href='{{ url('accounts/doLogout')}}'">
+                    onclick="location.href='{{ url('auths/doLogout')}}'">
                 ログアウト
             </button>
         </div>
@@ -40,8 +40,8 @@
                 </tr>
                 </thead>
                 <tbody class="table-light">
-                @if(!empty($dataList))
-                    @foreach($dataList as $data)
+                @if(!empty($items))
+                    @foreach($items as $data)
                         <tr>
                             <td>{{$data['id']}}</td>
                             <td>{{$data['item_name']}}</td>
