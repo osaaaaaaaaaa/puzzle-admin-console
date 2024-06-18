@@ -1,0 +1,34 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Inventory_Item;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class InventoryItemTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        for ($i = 1; $i < 5; $i++) {
+            Inventory_Item::create([
+                'player_id' => $i,
+                'item_id' => 1,
+                'item_cnt' => rand(0, 100)
+            ]);
+            Inventory_Item::create([
+                'player_id' => $i,
+                'item_id' => 2,
+                'item_cnt' => rand(0, 100)
+            ]);
+            Inventory_Item::create([
+                'player_id' => $i,
+                'item_id' => 3,
+                'item_cnt' => rand(0, 100)
+            ]);
+        }
+    }
+}

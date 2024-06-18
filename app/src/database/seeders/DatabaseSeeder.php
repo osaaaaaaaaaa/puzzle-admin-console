@@ -16,5 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         // マスターデータ(初期データ)挿入
         $this->call(AccountsTableSeeder::class);
+        $this->call(PlayerTableSeeder::class);
+        $this->call(ItemTableSeeder::class);
+        $this->call(InventoryItemTableSeeder::class);
     }
 }

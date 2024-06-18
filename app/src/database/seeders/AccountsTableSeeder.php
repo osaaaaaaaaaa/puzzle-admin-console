@@ -17,7 +17,7 @@ class AccountsTableSeeder extends Seeder
         // データを挿入
         Account::create([
             'name' => 'jobi',
-            'password' => Hash::make('jobi')    // レインボーテーブル対策でソルト・ストレッチングが含まれる
+            'password' => Hash::make('jobi')
         ]);
     }
 }
