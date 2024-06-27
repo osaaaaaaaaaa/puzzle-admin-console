@@ -148,6 +148,9 @@ return [
     'attributes' => [
         'name' => '名前',
         'password' => 'パスワード',
+        'account_name' => 'アカウント名',
+        'text' => 'テキスト',
+        'type_cnt' => 'アイテムの種類数',
         /* 必要に応じて追加 */
     ],
 ];

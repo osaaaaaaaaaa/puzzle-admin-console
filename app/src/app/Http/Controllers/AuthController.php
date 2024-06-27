@@ -11,20 +11,20 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     // ログイン画面を表示する
-    public function showLoginPage(Request $request)
+    public function index(Request $request)
     {
         // 既にログインしている場合
         if ($request->session()->has('login')) {
-            return redirect('home/index');
+            return redirect()->route('home.index');
         }
 
-        return view('auths/index', ['error' => $request['error'] ?? null]);
+        return view('auths/index', ['error' => $request['error'] ?? null]); // $request['error']がnullの場合は右辺の値(null)を入れる
     }
 
     // ログイン処理
     public function doLogin(Request $request)
     {
-        route('login');
+//        route('login');
 
 //        // バリデーションチェック
 //        $validated = $request->validate([
@@ -32,13 +32,14 @@ class AuthController extends Controller
 //            'password' => ['required'],
 //        ]); // エラー発生で自動で元のページへ戻る
 
+        // カスタムバリデーション
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'min:4'],
             'password' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return redirect("/")
+            return redirect()->route('auths.index')
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -50,11 +51,11 @@ class AuthController extends Controller
             if (Hash::check($request['password'], $account[0]->password)) {
                 // セッションに指定のキーで値を保存する
                 $request->session()->put('login', true);
-                return redirect('home/index');
+                return redirect()->route('home.index');
             }
         }
         // ルートに名前を指定
-        return redirect()->route('login', ['error' => 'invalid']);
+        return redirect()->route('auths.index', ['error' => 'invalid']);
     }
 
     // ログアウト処理
@@ -63,16 +64,12 @@ class AuthController extends Controller
         // セッションから全てのキーの値を削除する
         $request->session()->flush();
 
-        return redirect('/');
+        return redirect()->route('auths.index');
     }
 
     // ホームページ表示
     public function showHomePage(Request $request)
     {
-        if ($request->session()->has('login')) {
-            return view('home/index');
-        } else {
-            return redirect('/');
-        }
+        return view('home/index');
     }
 }

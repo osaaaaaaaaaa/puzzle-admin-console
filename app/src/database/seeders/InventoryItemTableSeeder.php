@@ -15,17 +15,17 @@ class InventoryItemTableSeeder extends Seeder
     {
         for ($i = 1; $i < 5; $i++) {
             Inventory_Item::create([
-                'player_id' => $i,
+                'user_id' => $i,
                 'item_id' => 1,
                 'item_cnt' => rand(0, 100)
             ]);
             Inventory_Item::create([
-                'player_id' => $i,
+                'user_id' => $i,
                 'item_id' => 2,
                 'item_cnt' => rand(0, 100)
             ]);
             Inventory_Item::create([
-                'player_id' => $i,
+                'user_id' => $i,
                 'item_id' => 3,
                 'item_cnt' => rand(0, 100)
             ]);

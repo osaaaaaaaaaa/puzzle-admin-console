@@ -5,29 +5,23 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('players', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('player_name', 20);
+            $table->string('user_name', 20);
             $table->integer('level');
             $table->integer('exp');
             $table->integer('life');
             $table->timestamps();
 
-            // インデックス設定
-            $table->index('player_name');
+            // ユニーク制約設定
+            $table->unique('user_name');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('players');
+        Schema::dropIfExists('users');
     }
 };

@@ -13,7 +13,7 @@
                 <h1 class="fw-bold mb-0 fs-2">ログイン情報を入力</h1>
             </div>
             <div class="modal-body p-5 pt-0">
-                <form method="post" action="{{ url('auths/doLogin')}}">
+                <form method="post" action="{{ route('auths.dologin')}}">
                     @csrf
                     <div class="form-floating mb-3">
                         <input type="text" name="name" value="@if(!empty($name)){{$name}}@endif"

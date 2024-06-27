@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('name', 20);     // 文字数制限を指定しない場合は255文字になる
             $table->string('password', '100');
             $table->timestamps();   // created_atとupdated_atが入る
-            
+
             // ユニーク制約設定
             $table->unique('name');
         });

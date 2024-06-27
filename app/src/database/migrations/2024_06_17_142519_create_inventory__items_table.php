@@ -12,10 +12,13 @@ return new class extends Migration {
     {
         Schema::create('inventory__items', function (Blueprint $table) {
             $table->id();
-            $table->integer('player_id');
+            $table->integer('user_id');
             $table->integer('item_id');
             $table->integer('item_cnt');
             $table->timestamps();
+
+            // ユニーク制約設定
+            $table->unique(['user_id', 'item_id']);
         });
     }
 

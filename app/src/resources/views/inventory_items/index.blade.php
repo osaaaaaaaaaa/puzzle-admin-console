@@ -8,18 +8,19 @@
 <body>
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-secondary">
     <div class="container-fluid">
-        <a class="navbar-brand text-warning fw-bold fs-4" href="{{ url('home/index')}}">パズルゲーム管理サイト</a>
+        <a class="navbar-brand text-warning fw-bold fs-4" href="{{ route('home.index')}}">パズルゲーム管理サイト</a>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item"><a href="{{ url('accounts/index')}}" class="nav-link active">アカウント</a></li>
-                <li class="nav-item"><a href="{{ url('players/index')}}" class="nav-link active">プレイヤー</a></li>
-                <li class="nav-item"><a href="{{ url('items/index')}}" class="nav-link active">アイテム</a></li>
-                <li class="nav-item"><a href="{{ url('inventoryItems/index')}}"
+                <li class="nav-item"><a href="{{ route('accounts.index')}}" class="nav-link active">アカウント</a>
+                </li>
+                <li class="nav-item"><a href="{{ route('users.index')}}" class="nav-link active">ユーザー</a></li>
+                <li class="nav-item"><a href="{{ route('items.index')}}" class="nav-link active">アイテム</a></li>
+                <li class="nav-item"><a href="{{ route('inventoryItems.index')}}"
                                         class="nav-link disabled">所持アイテム</a>
                 </li>
             </ul>
             <button type="button" class="btn btn-outline-danger me-2"
-                    onclick="location.href='{{ url('auths/doLogout')}}'">
+                    onclick="location.href='{{ route('auths.dologout')}}'">
                 ログアウト
             </button>
         </div>
@@ -28,13 +29,13 @@
 <div class="container p-5">
     <div class="row">
         <div class="col-md-12">
-            <h1 class="pt-5 pb-3">■ プレイヤーの所持アイテム一覧</h1>
+            <h1 class="pt-5 pb-3">■ ユーザーの所持アイテム一覧</h1>
             <form class="d-flex pb-3" role="search" method="post" action="{{ url('inventoryItems/index')}}">
                 @csrf
                 <div class="row">
                     <div class="col-md-8">
-                        <input name="player_name" class="form-control me-2 border-3" type="search"
-                               placeholder="プレイヤー名を入力"
+                        <input name="id" class="form-control me-2 border-3" type="search"
+                               placeholder="ユーザーIDを入力"
                                aria-label="Search">
                     </div>
                     <div class="col-md-4">
@@ -46,7 +47,7 @@
                 <thead class="table-primary">
                 <tr>
                     <th>ID</th>
-                    <th>プレイヤー名</th>
+                    <th>ユーザー名</th>
                     <th>アイテム名</th>
                     <th>所持個数</th>
                 </tr>
@@ -56,7 +57,7 @@
                     @foreach($inventory_items as $data)
                         <tr>
                             <td>{{$data->id}}</td>
-                            <td>{{$data->player_name}}</td>
+                            <td>{{$data->user_name}}</td>
                             <td>{{$data->item_name}}</td>
                             <td>{{$data->item_cnt}}</td>
                         </tr>
