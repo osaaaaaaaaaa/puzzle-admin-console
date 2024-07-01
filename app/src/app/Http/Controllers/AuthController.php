@@ -51,6 +51,7 @@ class AuthController extends Controller
             if (Hash::check($request['password'], $account[0]->password)) {
                 // セッションに指定のキーで値を保存する
                 $request->session()->put('login', true);
+                $request->session()->put('login_id', $account[0]->id);
                 return redirect()->route('home.index');
             }
         }

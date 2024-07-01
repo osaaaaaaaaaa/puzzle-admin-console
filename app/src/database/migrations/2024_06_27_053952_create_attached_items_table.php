@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->integer('cnt');
             $table->integer('mail_id');
             $table->timestamps();
+
+            $table->index(['item_id', 'mail_id']);
         });
     }
 

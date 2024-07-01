@@ -14,7 +14,7 @@ class ItemController
     public function items_index(Request $request)
     {
         // アカウントテーブルから全てのレコードを取得する
-        $items = Item::All();
+        $items = Item::paginate(20);
         Debugbar::info($items);
         return view('items/index', ['items' => $items]);
     }
@@ -28,7 +28,7 @@ class ItemController
             $inventory_items = Inventory_Item::selectRaw('users.id AS id,user_name,item_name,item_cnt')
                 ->join('users', 'inventory__items.user_id', '=', 'users.id')
                 ->join('items', 'inventory__items.item_id', '=', 'items.id')
-                ->get();
+                ->paginate(20);
             return view('inventory_items/index', ['inventory_items' => $inventory_items]);
         } else {// 指定がある場合
             // 条件指定してレコードを取得する
@@ -36,7 +36,7 @@ class ItemController
                 ->join('users', 'inventory__items.user_id', '=', 'users.id')
                 ->join('items', 'inventory__items.item_id', '=', 'items.id')
                 ->where('users.id', '=', $request->id)
-                ->get();
+                ->paginate(20);
             return view('inventory_items/index', ['inventory_items' => $inventory_items]);
         }
     }

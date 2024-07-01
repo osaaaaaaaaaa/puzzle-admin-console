@@ -9,6 +9,7 @@ use App\Models\Received_Mail;
 use App\Models\User;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 
 class MailController extends Controller
@@ -16,8 +17,15 @@ class MailController extends Controller
     // メール一覧表示
     public function index(Request $request)
     {
-        // メールマスタ取得する
-        $mails = Mail::all();
+        $currentPage = $request->page;                                      // 現在のページ数
+        $recordMax = 10;                                                    // １ページに表示する最大件数
+        $min = $currentPage > 1 ? ($currentPage - 1) * $recordMax : 0;      // レコードを取得する範囲(最小)
+        $max = $currentPage * $recordMax;                                   // レコードを取得する範囲(最大)
+
+        // メールマスタ取得する(１ページにつき$recordMax件表示する)
+        $mails = Mail::where('id', '>', '' . $min)->where('id', '<=', '' . $max)->get();
+        // 最大件数を取得する
+        $mailsCnt = Mail::count();
         // 最終的なデータを格納する
         $mailData = [];
 
@@ -36,48 +44,37 @@ class MailController extends Controller
 
             // データを格納する
             $array = [
-                [
-                    'id' => $mails[$i]['id'],
-                    'text' => $mails[$i]['text'],
-                    'item' => $itemData,
-                    'created_at' => $mails[$i]['created_at'],
-                    'updated_at' => $mails[$i]['updated_at']
-                ]
+                'id' => $mails[$i]['id'],
+                'text' => $mails[$i]['text'],
+                'item' => $itemData,
+                'created_at' => $mails[$i]['created_at'],
+                'updated_at' => $mails[$i]['updated_at']
             ];
-            $mailData = $mailData + $array;
+            $mailData[$i] = $array;
         }
 
-        return view('mails/index', ['mailData' => $mailData]);
+        // 自前の配列をページャーする
+        $view_mails = new LengthAwarePaginator($mailData, $mailsCnt, $recordMax, $request->page,
+            array('path' => '/mails/index'));
+
+        return view('mails/index', ['mailData' => $view_mails]);
     }
 
     // メール送信ページの表示
     public function create(Request $request)
     {
+        // ユーザー情報を取得する
+        $users = User::All();
+
         // アイテム情報を取得する
         $items = Item::All();
 
-        return view('mails/create', ['items' => $items, 'normally' => $request['normally']]);
+        return view('mails/create', ['users' => $users, 'items' => $items, 'normally' => $request['normally']]);
     }
 
     // メール作成処理
     public function store(Request $request)
     {
-//        // intに変換できるかどうか
-//        if (is_numeric($request['type_cnt'])) {
-//
-//            $request['item_data'] = [];
-//
-//            // アイテムの種類数分追加する
-//            for ($i = 0; $i < (int)$request['type_cnt']; $i++) {
-//
-//                $id = 'item_id' . ($i + 1);
-//                $cnt = 'cnt' . ($i + 1);
-//                $request['item_data'] += [
-//                    ['item_id' => $request[$id], 'item_cnt' => $request[$cnt]]
-//                ];
-//            }
-//        }
-
         // カスタムバリデーション
         $validator = Validator::make($request->all(), [
             'text' => ['required'],
@@ -112,20 +109,23 @@ class MailController extends Controller
         }
 
         // ユーザーが受け取ったかどうかのテーブルにレコードを追加する
-        $users = User::All();
-        foreach ($users as $user) {
-            Received_Mail::create(['user_id' => $user['id'], 'mail_id' => ($mailID_max + 1), 'is_received' => 0]);
+        if ($request->target_id === 0) {
+            // 全ユーザー指定の場合
+            $users = User::paginate(20);
+            foreach ($users as $user) {
+                Received_Mail::create(['user_id' => $user['id'], 'mail_id' => ($mailID_max + 1), 'is_received' => 0]);
+            }
+            Debugbar::info('全ユーザー指定');
+        } else {
+            // 特定のユーザー指定の場合
+            Received_Mail::create([
+                'user_id' => $request->target_id,
+                'mail_id' => ($mailID_max + 1),
+                'is_received' => 0
+            ]);
+            Debugbar::info($request->target_id . 'を指定');
         }
 
         return redirect()->route('mails.create', ['normally' => 'valid']);
-    }
-
-    // 確認画面の表示
-    public function confirm(Request $request)
-    {
-        // アイテム情報を取得する
-        $items = Item::All();
-
-        return view('mails/confirm', ['items' => $items, 'request' => $request]);
     }
 }

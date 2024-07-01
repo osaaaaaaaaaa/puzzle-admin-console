@@ -8,6 +8,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class AccountController extends Controller
 {
@@ -17,14 +19,24 @@ class AccountController extends Controller
         // アカウント名の指定があるかどうか
         if (empty($request->id)) {// 指定がない場合
             // アカウントテーブルから全てのレコードを取得する
-            $accounts = Account::All();
+            $accounts = Account::paginate(20);    // 10ページ分読み込む
             return view('accounts/index',
-                ['accounts' => $accounts, 'normally' => $request['normally']]);
+                [
+                    'accounts' => $accounts,
+                    'normally' => $request['normally'],
+                    'destroy_error' => $request['destroy_error'],
+                    'destroy_normally' => $request['destroy_normally'],
+                ]);
         } else {// 指定がある場合
             // 条件指定してレコードを取得する
-            $accounts = Account::where('id', '=', $request->id)->get();
+            $accounts = Account::where('id', '=', $request->id)->paginate(20);
             return view('accounts/index',
-                ['accounts' => $accounts, 'normally' => $request['normally']]);
+                [
+                    'accounts' => $accounts,
+                    'normally' => $request['normally'],
+                    'destroy_error' => $request['destroy_error'],
+                    'destroy_normally' => $request['destroy_normally'],
+                ]);
         }
     }
 
@@ -69,9 +81,15 @@ class AccountController extends Controller
     public function destroy(Request $request)
     {
         $account = Account::findorFail($request['destroy_account_id']);
-        $account->delete();
 
-        return redirect()->route('accounts.index');
+        // ログイン中のIDかどうか
+        $loginID = session()->get('login_id');
+        if ($loginID === $account->id) {
+            return redirect()->route('accounts.index', ['destroy_error' => 'invalid']);
+        }
+
+        $account->delete();
+        return redirect()->route('accounts.index', ['destroy_normally' => 'valid']);
     }
 
     // パスワード更新処理
@@ -96,20 +114,3 @@ class AccountController extends Controller
         return redirect()->route('accounts.index', ['normally' => 'valid']);
     }
 }
-
-//        // セッションに指定のキーで値を保存する
-//        $request->session()->put('login', true);
-//
-//        // セッションから指定のキーの値を取得
-//        Debugbar::info($request->session()->pull('login'));
-//
-//        // セッションから削除
-//        $request->session()->forget('login');
-//
-//        // セッションから全てのキーの値を削除する
-//        $request->session()->flush();
-//
-//        // セッションに指定したキーが存在するかどうか
-//        if ($request->session()->exists('login')) {
-//            Debugbar::info($request->session()->exists('login'));
-//        }

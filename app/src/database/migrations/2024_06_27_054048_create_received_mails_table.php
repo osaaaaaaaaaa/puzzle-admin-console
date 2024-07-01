@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->integer('mail_id');
             $table->boolean('is_received',);
             $table->timestamps();
+
+            $table->index(['user_id', 'mail_id']);
         });
     }
 
