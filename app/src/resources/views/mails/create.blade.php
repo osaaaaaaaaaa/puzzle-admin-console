@@ -4,7 +4,7 @@
     <div class="container my-3">
         <main>
             <div class="py-5 pt-5 text-center">
-                <h2 class="pt-5">一斉メール送信</h2>
+                <h2 class="pt-5">メール送信</h2>
             </div>
             <div class="row">
                 <div>

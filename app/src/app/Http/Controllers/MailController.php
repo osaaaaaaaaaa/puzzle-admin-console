@@ -17,7 +17,8 @@ class MailController extends Controller
     // メール一覧表示
     public function index(Request $request)
     {
-        $currentPage = $request->page;                                      // 現在のページ数
+
+        $currentPage = $request->page === null ? 1 : $request->page;        // 現在のページ数
         $recordMax = 10;                                                    // １ページに表示する最大件数
         $min = $currentPage > 1 ? ($currentPage - 1) * $recordMax : 0;      // レコードを取得する範囲(最小)
         $max = $currentPage * $recordMax;                                   // レコードを取得する範囲(最大)
@@ -109,7 +110,7 @@ class MailController extends Controller
         }
 
         // ユーザーが受け取ったかどうかのテーブルにレコードを追加する
-        if ($request->target_id === 0) {
+        if ($request->target_id === '0') {
             // 全ユーザー指定の場合
             $users = User::paginate(20);
             foreach ($users as $user) {

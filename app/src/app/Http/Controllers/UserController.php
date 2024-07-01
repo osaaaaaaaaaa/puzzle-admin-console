@@ -30,7 +30,7 @@ class UserController
         $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,user_name AS name,is_received,
         received__mails.created_at AS created_at,received__mails.updated_at AS updated_at')
             ->join('users', 'received__mails.user_id', '=', 'users.id')
-            ->get();
+            ->paginate(10);
 
         return view('users/mail', ['mails' => $mails]);
     }
