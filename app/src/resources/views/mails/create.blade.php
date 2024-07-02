@@ -15,8 +15,8 @@
                                class="form-label">送信先のユーザーIDを入力(全ユーザー指定のIDは0)</label>
                         <div class="col-md-2 py-1">
                             <input type="number" id="target" name="target_id" class="form-control" min="0" max="<?php
-                                                      if (!empty($users)) {
-                                                          echo count($users);
+                                                      if (!empty($userMax)) {
+                                                          echo $userMax;
                                                       }else{
                                                           echo 0;
                                                       }

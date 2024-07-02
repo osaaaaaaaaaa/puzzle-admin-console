@@ -65,19 +65,18 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('/', 'index')->name('index');
             // 受信メール一覧表示
             Route::get('mail', 'mail')->name('mail');
-        });
-
-    // 検索用
-    Route::get('users/index/{id?}', [UserController::class, 'index'])->name('users.show');
-
-    Route::prefix('inventoryItems')->name('inventoryItems.')->controller(ItemController::class)
-        ->middleware([AuthMiddleware::class])->group(function () {
+            // フォロー一覧表示
+            Route::get('follow', 'follow')->name('follow');
             // インベントリアイテム一覧表示
-            Route::get('/', 'inventoryItems_index')->name('index');
+            Route::get('item', 'item')->name('item');
         });
 
-    // 検索用
-    Route::post('inventoryItems/index/{id?}',
-        [ItemController::class, 'inventoryItems_index'])->name('inventoryItems.show');
+    // プレイヤー一覧表示(検索用)
+    Route::get('users/index/{id?}', [UserController::class, 'index'])->name('users.index.show');
 
+    // フォロー一覧表示(検索用)
+    Route::get('users/follow/{id?}', [UserController::class, 'follow'])->name('users.follow.show');
+
+    // インベントリアイテム一覧表示(検索用)
+    Route::get('users/item/{id?}', [UserController::class, 'item'])->name('users.item.show');
 });

@@ -40,9 +40,9 @@
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('users.index')}}">一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('users.follow')}}">フォロー一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.mail')}}">受信メール</a></li>
-                            <li><a class="dropdown-item"
-                                   href="{{ route('inventoryItems.index')}}">所持アイテム</a></li>
+                            <li><a class="dropdown-item" href="{{ route('users.item')}}">所持アイテム</a></li>
                         </ul>
                     </div>
                 </li>

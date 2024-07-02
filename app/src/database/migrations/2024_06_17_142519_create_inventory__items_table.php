@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');
             $table->integer('item_id');
-            $table->integer('item_cnt');
+            $table->integer('amount');
             $table->timestamps();
 
             // ユニーク制約設定

@@ -36,6 +36,11 @@
                 <p><a class="btn btn-primary" href="{{ route('users.index')}}">View details »</a></p>
             </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-people-fill home-icon"></i>
+                <h4 class="fw-normal">フォロー一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('users.follow')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-mailbox home-icon"></i>
                 <h4 class="fw-normal">受信メール一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('users.mail')}}">View details »</a></p>
@@ -43,7 +48,7 @@
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-handbag home-icon"></i>
                 <h4 class="fw-normal">所持アイテム一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('inventoryItems.index')}}">View details »</a></p>
+                <p><a class="btn btn-primary" href="{{ route('users.item')}}">View details »</a></p>
             </div>
         </div>
         <br>

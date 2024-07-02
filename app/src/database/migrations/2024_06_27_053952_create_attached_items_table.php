@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('attached__items', function (Blueprint $table) {
             $table->id();
             $table->integer('item_id');
-            $table->integer('cnt');
+            $table->integer('amount');
             $table->integer('mail_id');
             $table->timestamps();
 

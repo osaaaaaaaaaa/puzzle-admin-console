@@ -23,7 +23,7 @@
                         @foreach($items as $data)
                             <tr>
                                 <td>{{$data['id']}}</td>
-                                <td>{{$data['item_name']}}</td>
+                                <td>{{$data['name']}}</td>
                                 <td>{{$data['type']}}</td>
                                 <td>{{$data['effect']}}</td>
                                 <td>{{$data['description']}}</td>

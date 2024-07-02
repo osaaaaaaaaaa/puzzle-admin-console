@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Player;
-
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,5 +17,9 @@ class DatabaseSeeder extends Seeder
         $this->call(UserTableSeeder::class);
         $this->call(ItemTableSeeder::class);
         $this->call(InventoryItemTableSeeder::class);
+        $this->call(MailTableSeeder::class);
+        $this->call(AttachedItemTableSeeder::class);
+        $this->call(ReceivedMailTableSeeder::class);
+        $this->call(FollowTableSeeder::class);
     }
 }

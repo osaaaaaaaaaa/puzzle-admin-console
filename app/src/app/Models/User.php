@@ -13,4 +13,23 @@ class User extends Model
     protected $guarded = [
         'id',
     ];
+
+    // 所持アイテムのリレーション
+    public function items()
+    {
+        // 中間テーブルに関する複数行を取得
+        return $this->belongsToMany(
+        // 第二モデル , 第三テーブル , 第一モデルと関係のあるカラム , 第二モデルと関係のあるカラム
+            Item::class, 'inventory__items', 'user_id', 'item_id')
+            ->withPivot('amount');  // 中間テーブルのカラムを取得
+    }
+
+    // フォローのリレーション
+    public function follows()
+    {
+        // 中間テーブルに関する複数行を取得
+        return $this->belongsToMany(
+            User::class, 'follows', 'user_id', 'following_id')
+            ->withPivot('is_agreement');  // 中間テーブルのカラムを取得
+    }
 }

@@ -21,7 +21,7 @@ class UserFactory extends Factory
     {
         $scheduled_data = $this->faker->dateTimeBetween('+1day', '+1year'); // 日付をランダム生成
         return [
-            'user_name' => $this->faker->unique()->name(),
+            'name' => $this->faker->unique()->name(),
             'level' => $this->faker->numberBetween(1, 99),
             'exp' => $this->faker->randomNumber(5),
             'life' => $this->faker->randomNumber(1),

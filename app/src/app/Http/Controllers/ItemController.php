@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventory_Item;
 use App\Models\Item;
+use App\Models\User;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ItemController
@@ -17,27 +19,5 @@ class ItemController
         $items = Item::paginate(20);
         Debugbar::info($items);
         return view('items/index', ['items' => $items]);
-    }
-
-    // インベントリのアイテム一覧表示
-    public function inventoryItems_index(Request $request)
-    {
-        // アカウント名の指定があるかどうか
-        if (empty($request->id)) {// 指定がない場合
-            // アカウントテーブルから全てのレコードを取得する
-            $inventory_items = Inventory_Item::selectRaw('users.id AS id,user_name,item_name,item_cnt')
-                ->join('users', 'inventory__items.user_id', '=', 'users.id')
-                ->join('items', 'inventory__items.item_id', '=', 'items.id')
-                ->paginate(20);
-            return view('inventory_items/index', ['inventory_items' => $inventory_items]);
-        } else {// 指定がある場合
-            // 条件指定してレコードを取得する
-            $inventory_items = Inventory_Item::selectRaw('users.id AS id,user_name,item_name,item_cnt')
-                ->join('users', 'inventory__items.user_id', '=', 'users.id')
-                ->join('items', 'inventory__items.item_id', '=', 'items.id')
-                ->where('users.id', '=', $request->id)
-                ->paginate(20);
-            return view('inventory_items/index', ['inventory_items' => $inventory_items]);
-        }
     }
 }

@@ -1,12 +1,11 @@
 @extends('layouts.app')
-@section('title','PlayerList')
+@section('title','InventoryItemList')
 @section('body')
     <div class="container p-5">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="pt-5 pb-3">■ ユーザー一覧</h1>
-                <form class="d-flex pb-3" role="search" method="get"
-                      action="{{ route('users.index.show')}}">
+                <h1 class="pt-5 pb-3">■ ユーザーの所持アイテム一覧</h1>
+                <form class="d-flex pb-3" role="search" method="get" action="{{ route('users.item.show')}}">
                     @csrf
                     <div class="row">
                         <div class="col-md-8">
@@ -19,34 +18,31 @@
                         </div>
                     </div>
                 </form>
-                @if(!empty($users))
-                    {{$users->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
+                @if(!empty($items))
+                    {{$items->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
                 @endif
                 <table class="table table-hover">
                     <thead class="table-primary">
                     <tr>
                         <th>ID</th>
                         <th>ユーザー名</th>
-                        <th>レベル</th>
-                        <th>経験値</th>
-                        <th>ライフ</th>
+                        <th>アイテム名</th>
+                        <th>所持個数</th>
                     </tr>
                     </thead>
                     <tbody class="table-light">
-                    @if(!empty($users))
-                        @foreach($users as $data)
+                    @if(!empty($items))
+                        @foreach($items as $item)
                             <tr>
-                                <td>{{$data['id']}}</td>
-                                <td>{{$data['name']}}</td>
-                                <td>{{$data['level']}}</td>
-                                <td>{{$data['exp']}}</td>
-                                <td>{{$data['life']}}</td>
+                                <td>{{$item->id}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$item->name}}</td>
+                                <td>{{$item->pivot->amount}}</td>
                             </tr>
                         @endforeach
                     @endif
                     </tbody>
                 </table>
-                <br>
             </div>
         </div>
     </div>

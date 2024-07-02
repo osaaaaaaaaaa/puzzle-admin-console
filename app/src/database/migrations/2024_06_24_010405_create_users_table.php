@@ -9,14 +9,14 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('user_name', 20);
+            $table->string('name', 20);
             $table->integer('level');
             $table->integer('exp');
             $table->integer('life');
             $table->timestamps();
 
             // ユニーク制約設定
-            $table->unique('user_name');
+            $table->unique('name');
         });
     }
 

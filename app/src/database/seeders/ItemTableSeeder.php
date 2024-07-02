@@ -14,19 +14,19 @@ class ItemTableSeeder extends Seeder
     public function run(): void
     {
         Item::create([
-            'item_name' => '回復ポーション',
+            'name' => '回復ポーション',
             'type' => '消耗品',
             'effect' => 2,
             'description' => 'ライフを回復する'
         ]);
         Item::create([
-            'item_name' => '回復ポーション+',
+            'name' => '回復ポーション+',
             'type' => '消耗品',
             'effect' => 4,
             'description' => 'ライフを回復する'
         ]);
         Item::create([
-            'item_name' => '経験値ポーション',
+            'name' => '経験値ポーション',
             'type' => '消耗品',
             'effect' => 30,
             'description' => '経験値を獲得する'

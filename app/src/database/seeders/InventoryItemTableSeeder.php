@@ -17,17 +17,17 @@ class InventoryItemTableSeeder extends Seeder
             Inventory_Item::create([
                 'user_id' => $i,
                 'item_id' => 1,
-                'item_cnt' => rand(0, 100)
+                'amount' => rand(0, 100)
             ]);
             Inventory_Item::create([
                 'user_id' => $i,
                 'item_id' => 2,
-                'item_cnt' => rand(0, 100)
+                'amount' => rand(0, 100)
             ]);
             Inventory_Item::create([
                 'user_id' => $i,
                 'item_id' => 3,
-                'item_cnt' => rand(0, 100)
+                'amount' => rand(0, 100)
             ]);
         }
     }

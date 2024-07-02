@@ -32,7 +32,7 @@ class MailController extends Controller
 
         for ($i = 0; $i < count($mails); $i++) {
             // 添付アイテムを取得する
-            $attached_items = Attached_Item::selectRaw('item_name AS name, cnt')
+            $attached_items = Attached_Item::selectRaw('items.name AS name, amount')
                 ->join('items', 'items.id', '=', 'attached__items.item_id')
                 ->where('mail_id', '=', ($i + 1))
                 ->get();
@@ -40,7 +40,7 @@ class MailController extends Controller
             // アイテム情報を結合する
             $itemData = '';
             foreach ($attached_items as $item) {
-                $itemData = $itemData . $item['name'] . '×' . $item['cnt'] . ' , ';
+                $itemData = $itemData . $item['name'] . '×' . $item['amount'] . ' , ';
             }
 
             // データを格納する
@@ -55,7 +55,7 @@ class MailController extends Controller
         }
 
         // 自前の配列をページャーする
-        $view_mails = new LengthAwarePaginator($mailData, $mailsCnt, $recordMax, $request->page,
+        $view_mails = new LengthAwarePaginator($mailData, $mailsCnt, $recordMax, $currentPage,
             array('path' => '/mails/index'));
 
         return view('mails/index', ['mailData' => $view_mails]);
@@ -65,12 +65,12 @@ class MailController extends Controller
     public function create(Request $request)
     {
         // ユーザー情報を取得する
-        $users = User::All();
+        $userMax = User::count();
 
         // アイテム情報を取得する
         $items = Item::All();
 
-        return view('mails/create', ['users' => $users, 'items' => $items, 'normally' => $request['normally']]);
+        return view('mails/create', ['userMax' => $userMax, 'items' => $items, 'normally' => $request['normally']]);
     }
 
     // メール作成処理
@@ -104,7 +104,7 @@ class MailController extends Controller
                 Attached_Item::create([
                     'mail_id' => ($mailID_max + 1),
                     'item_id' => $request[$id],
-                    'cnt' => $request[$cnt]
+                    'amount' => $request[$cnt]
                 ]);
             }
         }
