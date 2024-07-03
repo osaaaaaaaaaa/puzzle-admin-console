@@ -34,16 +34,16 @@
                     </thead>
                     <tbody class="table-light">
                     @if(!empty($users))
-                        @foreach($users as $user)
+                        @for($i = 0;$i < count($users);$i++)
                             <tr>
-                                <td>{{$user->id}}</td>
-                                <td>{{$user->user_name}}</td>
-                                <td>{{$user->following_name}}</td>
-                                <td>{{$user->is_agreement}}</td>
-                                <td>{{$user->created_at}}</td>
-                                <td>{{$user->updated_at}}</td>
+                                <td>{{$users[$i]->id}}</td>
+                                <td>{{$users[$i]->user_name}}</td>
+                                <td>{{$users[$i]->following_name}}</td>
+                                <td>{{$is_agreement[$i]}}</td>
+                                <td>{{$users[$i]->created_at}}</td>
+                                <td>{{$users[$i]->updated_at}}</td>
                             </tr>
-                        @endforeach
+                        @endfor
                     @endif
                     </tbody>
                 </table>

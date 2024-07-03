@@ -42,12 +42,20 @@ class UserController
     }
 
     // 受信メール一覧表示
-    public function mail()
+    public function mail(Request $request)
     {
-        $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,users.name AS name,is_received,
+        if (!empty($request->id)) {
+            $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,users.name AS name,is_received,
         received__mails.created_at AS created_at,received__mails.updated_at AS updated_at')
-            ->join('users', 'received__mails.user_id', '=', 'users.id')
-            ->paginate(10);
+                ->join('users', 'received__mails.user_id', '=', 'users.id')
+                ->where('received__mails.user_id', '=', $request->id)
+                ->paginate(10);
+        } else {
+            $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,users.name AS name,is_received,
+        received__mails.created_at AS created_at,received__mails.updated_at AS updated_at')
+                ->join('users', 'received__mails.user_id', '=', 'users.id')
+                ->paginate(10);
+        }
 
         return view('users/mail', ['mails' => $mails]);
     }
@@ -56,20 +64,29 @@ class UserController
     public function follow(Request $request)
     {
         if (empty($request->id)) {
-            $users = Follow::selectRaw('follows.id AS id , u1.name AS user_name,u2.name AS following_name,
-        is_agreement,follows.created_at AS created_at,follows.updated_at AS updated_at')
+
+            $users = Follow::selectRaw('follows.id AS id,follows.user_id , follows.following_id , u1.name AS user_name,u2.name AS following_name,
+            follows.created_at AS created_at,follows.updated_at AS updated_at')
                 ->join('users AS u1', 'follows.user_id', '=', 'u1.id')
                 ->join('users AS u2', 'follows.following_id', '=', 'u2.id')
                 ->get();
         } else {
-            $users = Follow::selectRaw('follows.id AS id , u1.name AS user_name,u2.name AS following_name,
-        is_agreement,follows.created_at AS created_at,follows.updated_at AS updated_at')
+            $users = Follow::selectRaw('follows.id AS id ,follows.user_id , follows.following_id , u1.name AS user_name,u2.name AS following_name,
+            follows.created_at AS created_at,follows.updated_at AS updated_at')
                 ->join('users AS u1', 'follows.user_id', '=', 'u1.id')
                 ->join('users AS u2', 'follows.following_id', '=', 'u2.id')
                 ->where('follows.user_id', '=', $request->id)
                 ->get();
         }
 
-        return view('users/follow', ['users' => $users ?? null]);
+        // 相互フォローかどうかの情報を格納する
+        $is_agreement = [];
+        for ($i = 0; $i < count($users); $i++) {
+            $following_user = Follow::where('user_id', '=', $users[$i]['following_id'])
+                ->where('following_id', '=', $users[$i]['user_id'])->exists();
+            $is_agreement[$i] = $following_user === true ? 1 : 0;
+        }
+
+        return view('users/follow', ['users' => $users ?? null, 'is_agreement' => $is_agreement ?? null]);
     }
 }

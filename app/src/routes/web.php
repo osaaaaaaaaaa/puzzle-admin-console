@@ -15,7 +15,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     // [ 認証 ] ##########################################################################
 
-    Route::get('/', [AuthController::class, 'index'])->name('auths.index'); // ログインページ表示
+    // ログインページ表示
+    Route::get('/', [AuthController::class, 'index'])->name('auths.index');
 
     // ログイン処理
     Route::post('auths/dologin', [AuthController::class, 'doLogin'])->name('auths.dologin');
@@ -76,6 +77,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     // フォロー一覧表示(検索用)
     Route::get('users/follow/{id?}', [UserController::class, 'follow'])->name('users.follow.show');
+
+    // 受信メール一覧表示(検索用)
+    Route::get('users/mail/{id?}', [UserController::class, 'mail'])->name('users.mail.show');
 
     // インベントリアイテム一覧表示(検索用)
     Route::get('users/item/{id?}', [UserController::class, 'item'])->name('users.item.show');

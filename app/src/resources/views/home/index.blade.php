@@ -36,7 +36,7 @@
                 <p><a class="btn btn-primary" href="{{ route('users.index')}}">View details »</a></p>
             </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
-                <i class="bi bi-people-fill home-icon"></i>
+                <i class="bi bi-person-check-fill home-icon"></i>
                 <h4 class="fw-normal">フォロー一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('users.follow')}}">View details »</a></p>
             </div>

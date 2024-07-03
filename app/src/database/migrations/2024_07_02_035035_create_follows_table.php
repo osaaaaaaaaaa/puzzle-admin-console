@@ -11,8 +11,10 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');         // 自身のユーザーID
             $table->integer('following_id');    // 相手のユーザーID
-            $table->boolean('is_agreement');    // 相互フォローかどうか
             $table->timestamps();
+
+            // インデックス追加
+            $table->index(['user_id', 'following_id']);
         });
     }
 
