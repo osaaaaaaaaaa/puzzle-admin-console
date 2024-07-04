@@ -92,7 +92,7 @@
                     '<select class="form-select" id="state" name="item_id' + (i + 1) + '" required>' +
                     @if(!empty($items))
                         @foreach($items as $item)
-                        '<option value="{{$item['id']}}">{{$item['item_name']}}</option>' +
+                        '<option value="{{$item['id']}}">{{$item['name']}}</option>' +
                     @endforeach
                         @endif
                         '</select>' +

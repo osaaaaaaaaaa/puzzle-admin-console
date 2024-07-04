@@ -7,19 +7,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('follows', function (Blueprint $table) {
+        Schema::create('following_users', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');         // 自身のユーザーID
-            $table->integer('following_id');    // 相手のユーザーID
+            $table->integer('user_id');              // 自身のユーザーID
+            $table->integer('following_user_id');    // 相手のユーザーID
             $table->timestamps();
 
             // インデックス追加
-            $table->index(['user_id', 'following_id']);
+            $table->index(['user_id', 'following_user_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('follows');
+        Schema::dropIfExists('following_users');
     }
 };

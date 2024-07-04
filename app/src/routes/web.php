@@ -55,9 +55,6 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
         Route::get('mails/create', [MailController::class, 'create'])->name('mails.create');      // メール送信画面表示
     });
 
-    // メール作成・送信処理
-    Route::post('mails/store', [MailController::class, 'store'])->name('mails.store');
-
     // [ ユーザーデータ ] ##########################################################################
 
     Route::prefix('users')->name('users.')->controller(UserController::class)
@@ -75,12 +72,15 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     // プレイヤー一覧表示(検索用)
     Route::get('users/index/{id?}', [UserController::class, 'index'])->name('users.index.show');
 
+    // インベントリアイテム一覧表示(検索用)
+    Route::get('users/item/{id?}', [UserController::class, 'item'])->name('users.item.show');
+
     // フォロー一覧表示(検索用)
     Route::get('users/follow/{id?}', [UserController::class, 'follow'])->name('users.follow.show');
 
+    // メール作成・送信処理
+    Route::post('mails/store', [MailController::class, 'store'])->name('mails.store');
+
     // 受信メール一覧表示(検索用)
     Route::get('users/mail/{id?}', [UserController::class, 'mail'])->name('users.mail.show');
-
-    // インベントリアイテム一覧表示(検索用)
-    Route::get('users/item/{id?}', [UserController::class, 'item'])->name('users.item.show');
 });

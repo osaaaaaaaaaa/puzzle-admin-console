@@ -23,8 +23,6 @@
                         </a>
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('mails.index')}}">メール一覧表示</a></li>
-                            <li><a class="dropdown-item" href="{{ route('mails.create')}}">メール送信</a></li>
                             <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
                         </ul>
                     </div>
@@ -40,9 +38,9 @@
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('users.index')}}">一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('users.item')}}">所持アイテム</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.follow')}}">フォロー一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.mail')}}">受信メール</a></li>
-                            <li><a class="dropdown-item" href="{{ route('users.item')}}">所持アイテム</a></li>
                         </ul>
                     </div>
                 </li>
@@ -58,6 +56,21 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('accounts.index')}}">一覧表示</a></li>
                             <li><a class="dropdown-item" href="{{ route('accounts.create')}}">登録</a></li>
+                        </ul>
+                    </div>
+                </li>
+                {{--メール管理--}}
+                <li>
+                    <div class="dropdown">
+                        <!-- 切替ボタンの設定 -->
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            メール管理
+                        </a>
+                        <!-- ドロップメニューの設定 -->
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('mails.index')}}">一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('mails.create')}}">送信</a></li>
                         </ul>
                     </div>
                 </li>

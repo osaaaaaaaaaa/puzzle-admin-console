@@ -64,26 +64,25 @@ class UserController
     public function follow(Request $request)
     {
         if (empty($request->id)) {
-
-            $users = Follow::selectRaw('follows.id AS id,follows.user_id , follows.following_id , u1.name AS user_name,u2.name AS following_name,
-            follows.created_at AS created_at,follows.updated_at AS updated_at')
-                ->join('users AS u1', 'follows.user_id', '=', 'u1.id')
-                ->join('users AS u2', 'follows.following_id', '=', 'u2.id')
+            $users = Follow::selectRaw('following_users.id AS id,following_users.user_id , following_users.following_user_id , u1.name AS user_name,u2.name AS following_name,
+            following_users.created_at AS created_at,following_users.updated_at AS updated_at')
+                ->join('users AS u1', 'following_users.user_id', '=', 'u1.id')
+                ->join('users AS u2', 'following_users.following_user_id', '=', 'u2.id')
                 ->get();
         } else {
-            $users = Follow::selectRaw('follows.id AS id ,follows.user_id , follows.following_id , u1.name AS user_name,u2.name AS following_name,
-            follows.created_at AS created_at,follows.updated_at AS updated_at')
-                ->join('users AS u1', 'follows.user_id', '=', 'u1.id')
-                ->join('users AS u2', 'follows.following_id', '=', 'u2.id')
-                ->where('follows.user_id', '=', $request->id)
+            $users = Follow::selectRaw('following_users.id AS id ,following_users.user_id , following_users.following_user_id , u1.name AS user_name,u2.name AS following_name,
+            following_users.created_at AS created_at,following_users.updated_at AS updated_at')
+                ->join('users AS u1', 'following_users.user_id', '=', 'u1.id')
+                ->join('users AS u2', 'following_users.following_user_id', '=', 'u2.id')
+                ->where('following_users.user_id', '=', $request->id)
                 ->get();
         }
 
         // 相互フォローかどうかの情報を格納する
         $is_agreement = [];
         for ($i = 0; $i < count($users); $i++) {
-            $following_user = Follow::where('user_id', '=', $users[$i]['following_id'])
-                ->where('following_id', '=', $users[$i]['user_id'])->exists();
+            $following_user = Follow::where('user_id', '=', $users[$i]['following_user_id'])
+                ->where('following_user_id', '=', $users[$i]['user_id'])->exists();
             $is_agreement[$i] = $following_user === true ? 1 : 0;
         }
 

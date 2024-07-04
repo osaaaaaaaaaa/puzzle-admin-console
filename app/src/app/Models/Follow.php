@@ -10,4 +10,6 @@ class Follow extends Model
     protected $guarded = [
         'id',
     ];
+
+    protected $table = "following_users";
 }
