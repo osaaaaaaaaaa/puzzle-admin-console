@@ -1,0 +1,27 @@
+//************************************************************************************
+//  リクエストファイル [ローカル用] application/json ... htmlでのエラーを返されないようにする
+//************************************************************************************
+
+### ユーザー情報取得1(ID指定)
+GET http://localhost:8000/api/users/1
+Accept: application/json
+
+### ユーザー情報取得2(レベル指定)
+GET http://localhost:8000/api/users/index?min_level=30&max_level=60
+Accept: application/json
+
+### アイテムリスト
+GET http://localhost:8000/api/items
+Accept: application/json
+
+### メールリスト
+GET http://localhost:8000/api/mails
+Accept: application/json
+
+### 指定ユーザーの所持アイテムリスト
+GET http://localhost:8000/api/users/items/1
+Accept: application/json
+
+### 指定ユーザーの受信メールリスト
+GET http://localhost:8000/api/users/mails/1
+Accept: application/json

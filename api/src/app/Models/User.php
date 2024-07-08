@@ -27,15 +27,12 @@ class User extends Model
     // 受信メールのリレーション
     public function mails()
     {
-        return $this->hasMany(Mail::class);
+        return $this->hasMany(Received_Mail::class);
     }
 
     // フォローのリレーション
     public function follows()
     {
-        // 中間テーブルに関する複数行を取得
-        return $this->belongsToMany(
-            User::class, 'follows', 'user_id', 'following_id')
-            ->withPivot('is_agreement');  // 中間テーブルのカラムを取得
+        return $this->hasMany(Follow::class);
     }
 }

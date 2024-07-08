@@ -33,7 +33,7 @@ return [
 
     'stores' => [
 
-        // Laravelのキャッシュ設定無効化
+        // Laravelキャッシュ設定無効化
         'none' => [
             'driver' => 'null',
         ],
@@ -45,9 +45,10 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'table' => env('DB_CACHE_TABLE', 'cache'),
             'connection' => env('DB_CACHE_CONNECTION'),
+            'table' => env('DB_CACHE_TABLE', 'cache'),
             'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 
         'file' => [
