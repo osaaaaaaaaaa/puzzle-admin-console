@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Follow;
-use App\Models\Received_Mail;
+use App\Models\FollowingUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -44,48 +43,37 @@ class UserController
     // 受信メール一覧表示
     public function mail(Request $request)
     {
-        if (!empty($request->id)) {
-            $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,users.name AS name,is_received,
-        received__mails.created_at AS created_at,received__mails.updated_at AS updated_at')
-                ->join('users', 'received__mails.user_id', '=', 'users.id')
-                ->where('received__mails.user_id', '=', $request->id)
-                ->paginate(10);
-        } else {
-            $mails = Received_Mail::selectRaw('received__mails.id AS id,mail_id,users.name AS name,is_received,
-        received__mails.created_at AS created_at,received__mails.updated_at AS updated_at')
-                ->join('users', 'received__mails.user_id', '=', 'users.id')
-                ->paginate(10);
+        // モデルを取得する
+        $user = User::find($request->id);
+
+        // リレーション
+        if (!empty($user)) {
+            $mails = $user->mails()->paginate(10);
+            $mails->appends(['id' => $request->id]);
         }
 
-        return view('users/mail', ['mails' => $mails]);
+        return view('users/mail', ['user' => $user, 'mails' => $mails ?? null]);
     }
 
     // フォロー一覧表示
     public function follow(Request $request)
     {
-        if (empty($request->id)) {
-            $users = Follow::selectRaw('following_users.id AS id,following_users.user_id , following_users.following_user_id , u1.name AS user_name,u2.name AS following_name,
-            following_users.created_at AS created_at,following_users.updated_at AS updated_at')
-                ->join('users AS u1', 'following_users.user_id', '=', 'u1.id')
-                ->join('users AS u2', 'following_users.following_user_id', '=', 'u2.id')
-                ->get();
-        } else {
-            $users = Follow::selectRaw('following_users.id AS id ,following_users.user_id , following_users.following_user_id , u1.name AS user_name,u2.name AS following_name,
-            following_users.created_at AS created_at,following_users.updated_at AS updated_at')
-                ->join('users AS u1', 'following_users.user_id', '=', 'u1.id')
-                ->join('users AS u2', 'following_users.following_user_id', '=', 'u2.id')
-                ->where('following_users.user_id', '=', $request->id)
-                ->get();
+        // モデルを取得する
+        $user = User::find($request->id);
+
+        if (!empty($user)) {
+            // リレーション
+            $following_users = $user->follows()->paginate(10);
+            $following_users->appends(['id' => $request->id]);
+
+            // 相互フォローかどうかの情報を格納する
+            for ($i = 0; $i < count($following_users); $i++) {
+                $isFollow = FollowingUser::where('user_id', '=', $following_users[$i]->id)
+                    ->where('following_user_id', '=', $user->id)->exists();
+                $following_users[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+            }
         }
 
-        // 相互フォローかどうかの情報を格納する
-        $is_agreement = [];
-        for ($i = 0; $i < count($users); $i++) {
-            $following_user = Follow::where('user_id', '=', $users[$i]['following_user_id'])
-                ->where('following_user_id', '=', $users[$i]['user_id'])->exists();
-            $is_agreement[$i] = $following_user === true ? 1 : 0;
-        }
-
-        return view('users/follow', ['users' => $users ?? null, 'is_agreement' => $is_agreement ?? null]);
+        return view('users/follow', ['user' => $user ?? null, 'following_users' => $following_users ?? null]);
     }
 }

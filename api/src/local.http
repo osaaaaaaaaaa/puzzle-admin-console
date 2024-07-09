@@ -3,7 +3,7 @@
 //************************************************************************************
 
 ### ユーザー情報取得1(ID指定)
-GET http://localhost:8000/api/users/1
+GET http://localhost:8000/api/users/11
 Accept: application/json
 
 ### ユーザー情報取得2(レベル指定)
@@ -11,17 +11,88 @@ GET http://localhost:8000/api/users/index?min_level=30&max_level=60
 Accept: application/json
 
 ### アイテムリスト
-GET http://localhost:8000/api/items
+GET http://localhost:8000/api/users/item/show?user_id=1
+Accept: application/json
+
+### フォローリスト
+GET http://localhost:8000/api/users/follow/show?user_id=1
 Accept: application/json
 
 ### メールリスト
-GET http://localhost:8000/api/mails
+GET http://localhost:8000/api/users/mail/show?user_id=1
 Accept: application/json
 
 ### 指定ユーザーの所持アイテムリスト
-GET http://localhost:8000/api/users/items/1
+GET http://localhost:8000/api/users/item/1
 Accept: application/json
 
 ### 指定ユーザーの受信メールリスト
-GET http://localhost:8000/api/users/mails/1
+GET http://localhost:8000/api/users/mail/1
 Accept: application/json
+
+//**********************************************************
+//  [POST] Content-Type ... リクエスト本体がJSONという宣言
+//**********************************************************
+
+### ユーザー登録
+POST http://localhost:8000/api/users/store
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "プレイヤー12341234",
+    "level": 1,
+    "exp": 0,
+    "life": 1
+}
+
+### ユーザー更新
+POST http://localhost:8000/api/users/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 11,
+    "name": "oldプレイヤー"
+}
+
+### フォロー登録
+POST http://localhost:8000/api/users/follow/store
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 5,
+    "following_user_id": 6
+}
+
+### フォロー解除
+POST http://localhost:8000/api/users/follow/destroy
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 5,
+    "following_user_id": 6
+}
+
+### 所持アイテム更新
+POST http://localhost:8000/api/users/item/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 11,
+    "item_id": 2,
+    "allie_amount": -2
+}
+
+### 受信メール開封(+アイテム受け取り)
+POST http://localhost:8000/api/users/mail/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 11,
+    "mail_id": 3
+}

@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(MailTableSeeder::class);
         $this->call(AttachedItemTableSeeder::class);
         $this->call(ReceivedMailTableSeeder::class);
-        $this->call(FollowTableSeeder::class);
+        $this->call(FollowingUserTableSeeder::class);
     }
 }

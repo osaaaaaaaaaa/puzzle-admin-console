@@ -35,14 +35,14 @@
                     </thead>
                     <tbody class="table-light">
                     @if(!empty($mails))
-                        @foreach($mails as $data)
+                        @foreach($mails as $mail)
                             <tr>
-                                <td>{{$data['id']}}</td>
-                                <td>{{$data['name']}}</td>
-                                <td>{{$data['mail_id']}}</td>
-                                <td>{{$data['is_received']}}</td>
-                                <td>{{$data['created_at']}}</td>
-                                <td>{{$data['updated_at']}}</td>
+                                <td>{{$mail->id}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$mail->mail_id}}</td>
+                                <td>{{$mail->is_received}}</td>
+                                <td>{{$mail->created_at}}</td>
+                                <td>{{$mail->updated_at}}</td>
                             </tr>
                         @endforeach
                     @endif

@@ -33,6 +33,8 @@ class User extends Model
     // フォローのリレーション
     public function follows()
     {
-        return $this->hasMany(Follow::class);
+        return $this->belongsToMany(
+            User::class, 'following_users', 'user_id', 'following_user_id')
+            ->withPivot('id');
     }
 }

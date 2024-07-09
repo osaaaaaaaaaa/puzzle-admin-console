@@ -10,7 +10,7 @@ class UserFollowResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'following_user_id' => $this->following_user_id,
+            'following_user_name' => $this->name,
             'is_agreement' => $this->is_agreement
         ];
     }

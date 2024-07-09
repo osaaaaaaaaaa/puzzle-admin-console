@@ -18,8 +18,8 @@
                         </div>
                     </div>
                 </form>
-                @if(!empty($items))
-                    {{$items->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
+                @if(!empty($aaaa))
+                    {{$user->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
                 @endif
                 <table class="table table-hover">
                     <thead class="table-primary">
@@ -33,17 +33,17 @@
                     </tr>
                     </thead>
                     <tbody class="table-light">
-                    @if(!empty($users))
-                        @for($i = 0;$i < count($users);$i++)
+                    @if(!empty($following_users))
+                        @foreach($following_users as $follow)
                             <tr>
-                                <td>{{$users[$i]->id}}</td>
-                                <td>{{$users[$i]->user_name}}</td>
-                                <td>{{$users[$i]->following_name}}</td>
-                                <td>{{$is_agreement[$i]}}</td>
-                                <td>{{$users[$i]->created_at}}</td>
-                                <td>{{$users[$i]->updated_at}}</td>
+                                <td>{{$follow->pivot->id}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$follow->name}}</td>
+                                <td>{{$follow->is_agreement}}</td>
+                                <td>{{$follow->created_at}}</td>
+                                <td>{{$follow->updated_at}}</td>
                             </tr>
-                        @endfor
+                        @endforeach
                     @endif
                     </tbody>
                 </table>
