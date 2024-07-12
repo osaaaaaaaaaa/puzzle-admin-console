@@ -3,7 +3,7 @@
 //************************************************************************************
 
 ### ユーザー情報取得1(ID指定)
-GET http://localhost:8000/api/users/11
+GET http://172.207.230.73//api/users/1
 Accept: application/json
 
 ### ユーザー情報取得2(レベル指定)
@@ -23,11 +23,11 @@ GET http://localhost:8000/api/users/mail/show?user_id=1
 Accept: application/json
 
 ### 指定ユーザーの所持アイテムリスト
-GET http://localhost:8000/api/users/item/1
+GET http://localhost:8000/api/users/item/show?user_id=1
 Accept: application/json
 
 ### 指定ユーザーの受信メールリスト
-GET http://localhost:8000/api/users/mail/1
+GET http://localhost:8000/api/users/mail/show?user_id=1
 Accept: application/json
 
 //**********************************************************

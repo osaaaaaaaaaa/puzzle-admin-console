@@ -191,7 +191,7 @@ class UserController extends Controller
         //-------------------
         // 登録処理
         //-------------------
-        // レコードが存在しなかった&&加減する値が0以上の場合
+        // レコードが存在しなかった&&加減する値が0以上の場合[登録可能]
         if (empty($userItem) && $request->allie_amount > 0) {
             $userItem = Inventory_Item::create([
                 'user_id' => $request->user_id,
@@ -199,17 +199,19 @@ class UserController extends Controller
                 'amount' => $request->allie_amount,
             ]);
             return response()->json(['id' => $userItem->id]);
-        } elseif (empty($userItem) && $request->allie_amount <= 0) {
+        } // レコードが存在しなかった&&加減する値が0以下の場合[登録不可]
+        elseif (empty($userItem) && $request->allie_amount <= 0) {
             abort(404);
         }
 
         //-------------------
-        // 更新処理(加減処理)
+        // 更新処理(レコードが存在する場合)
         //-------------------
-        // 加減した結果、0以上の場合
+        // 加減した結果、個数が0以上の場合
         if ($userItem->amount + $request->allie_amount >= 0) {
             $userItem->amount += $request->allie_amount;
-        } else {
+        } // 加減した結果、個数が0以下の場合
+        else {
             $userItem->amount = 0;
         }
         $userItem->save();
@@ -241,11 +243,14 @@ class UserController extends Controller
         //------------------------
         // 添付アイテムの受け取り処理
         //------------------------
-        $attachedItems = Attached_Item::where('mail_id', '=', $request->mail_id)->get();
+        $attachedItems = Attached_Item::where('mail_id', '=', $request->mail_id)->get();    // メールの添付アイテムを取得
         if (!empty($attachedItems)) {
             foreach ($attachedItems as $item) {
+
+                // 今回受け取るアイテムに関するレコードが、所持アイテムテーブルに存在するかチェック
                 $userItem = Inventory_Item::where('user_id', '=', $request->user_id)->where('item_id', '=',
                     $item->item_id)->get()->first();
+
                 // レコードが存在しない場合は登録する
                 if (empty($userItem)) {
                     $userItem = Inventory_Item::create([
@@ -253,7 +258,7 @@ class UserController extends Controller
                         'item_id' => $item->item_id,
                         'amount' => $item->amount,
                     ]);
-                } // レコードが存在する場合は更新(加算)する
+                } // レコードが存在する場合は更新する
                 else {
                     $userItem->amount += $item->amount;
                     $userItem->save();
