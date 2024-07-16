@@ -18,6 +18,25 @@
             </div>
         </div>
         <br>
+        <h1 class="mt-5 mb-5 pb-2 border-bottom border-4">■ ログデータ</h1>
+        <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">フォローログ一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('logs.follow')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">アイテムログ一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('logs.item')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">メールログ一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('logs.mail')}}">View details »</a></p>
+            </div>
+        </div>
+        <br>
         <h1 class="mt-5 mb-5 pb-2 border-bottom border-4">■ ユーザーデータ</h1>
         <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
             <div class="col-md-2 border rounded-3 bg-body-tertiary">

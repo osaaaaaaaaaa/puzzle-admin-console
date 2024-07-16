@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
-    use HasFactory;
-
     // $guardedには更新しないカラムを指定する
     protected $guarded = [
         'id',
@@ -27,7 +25,7 @@ class User extends Model
     // 受信メールのリレーション
     public function mails()
     {
-        return $this->hasMany(Received_Mail::class);
+        return $this->hasMany(UserMail::class);
     }
 
     // フォローのリレーション
@@ -36,5 +34,27 @@ class User extends Model
         return $this->belongsToMany(
             User::class, 'following_users', 'user_id', 'following_user_id')
             ->withPivot('id');
+    }
+
+    // フォローログのリレーション
+    public function follow_logs()
+    {
+        return $this->belongsToMany(
+            User::class, 'follow_logs', 'user_id', 'target_user_id')
+            ->withPivot('id', 'action', 'created_at');
+    }
+
+    // アイテムログのリレーション
+    public function item_logs()
+    {
+        return $this->belongsToMany(
+            Item::class, 'item_logs', 'user_id', 'item_id')
+            ->withPivot('id', 'option_id', 'allie_count', 'created_at');
+    }
+
+    // メールログのリレーション
+    public function mail_logs()
+    {
+        return $this->hasMany(MailLogs::class);
     }
 }

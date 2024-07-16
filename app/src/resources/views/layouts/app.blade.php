@@ -27,6 +27,22 @@
                         </ul>
                     </div>
                 </li>
+                {{--ログデータ--}}
+                <li>
+                    <div class="dropdown">
+                        <!-- 切替ボタンの設定 -->
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            ログデータ
+                        </a>
+                        <!-- ドロップメニューの設定 -->
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('logs.follow')}}">フォローログ一覧</a></li>
+                            <li><a class="dropdown-item" href="{{ route('logs.item')}}">アイテムログ一覧</a></li>
+                            <li><a class="dropdown-item" href="{{ route('logs.mail')}}">メールログ一覧</a></li>
+                        </ul>
+                    </div>
+                </li>
                 {{--ユーザーデータ--}}
                 <li>
                     <div class="dropdown">

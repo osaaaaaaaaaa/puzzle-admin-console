@@ -5,12 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('inventory__items', function (Blueprint $table) {
+        Schema::create('user_items', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id');
             $table->integer('item_id');
@@ -22,11 +19,8 @@ return new class extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('inventory__items');
+        Schema::dropIfExists('user_items');
     }
 };

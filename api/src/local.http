@@ -22,12 +22,16 @@ Accept: application/json
 GET http://localhost:8000/api/users/mail/show?user_id=1
 Accept: application/json
 
-### 指定ユーザーの所持アイテムリスト
+### 所持アイテムリスト取得
 GET http://localhost:8000/api/users/item/show?user_id=1
 Accept: application/json
 
-### 指定ユーザーの受信メールリスト
+### 受信メールリスト取得
 GET http://localhost:8000/api/users/mail/show?user_id=1
+Accept: application/json
+
+### フォローログ取得
+GET http://localhost:8000/api/logs/follow?user_id=1
 Accept: application/json
 
 //**********************************************************
@@ -65,9 +69,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 11,
-    "item_id": 2,
-    "allie_amount": -2
+    "user_id": 5,
+    "item_id": 1,
+    "option_id": 1,
+    "allie_amount": 2
 }
 
 ### フォロー登録

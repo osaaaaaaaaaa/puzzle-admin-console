@@ -8,9 +8,12 @@ use App\Http\Resources\UserMailResource;
 use App\Http\Resources\UserResource;
 use App\Models\Attached_Item;
 use App\Models\FollowingUser;
-use App\Models\Inventory_Item;
-use App\Models\Received_Mail;
+use App\Models\FollowLogs;
+use App\Models\ItemLogs;
+use App\Models\MailLogs;
 use App\Models\User;
+use App\Models\UserItem;
+use App\Models\UserMail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -89,11 +92,12 @@ class UserController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        // 更新処理
+        $user = User::findOrFail($request->user_id);
+
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request) {
-                // 更新処理
-                $user = User::findOrFail($request->user_id);
+            DB::transaction(function () use ($request, $user) {
                 $user->name = $request->name;
                 $user->level = $request->level;
                 $user->exp = $request->exp;
@@ -123,6 +127,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => ['required', 'int', 'min:1'],
             'item_id' => ['required', 'int', 'min:1'],
+            'option_id' => ['required', 'int', 'min:1'],
             'allie_amount' => ['required', 'int'],
         ]);
         if ($validator->fails()) {
@@ -133,7 +138,7 @@ class UserController extends Controller
         User::findOrFail($request->user_id);
 
         // レコード存在チェック
-        $userItem = Inventory_Item::where('user_id', '=', $request->user_id)->where("item_id", "=",
+        $userItem = UserItem::where('user_id', '=', $request->user_id)->where("item_id", "=",
             $request->item_id)->first();
 
         //----------------------------------
@@ -145,10 +150,18 @@ class UserController extends Controller
                 // トランザクション処理
                 DB::transaction(function () use ($request) {
                     // 登録処理
-                    Inventory_Item::create([
+                    UserItem::create([
                         'user_id' => $request->user_id,
                         'item_id' => $request->item_id,
                         'amount' => $request->allie_amount,
+                    ]);
+
+                    // ログテーブル登録処理
+                    ItemLogs::create([
+                        'user_id' => $request->user_id,
+                        'item_id' => $request->item_id,
+                        'option_id' => $request->option_id,
+                        'allie_count' => $request->allie_amount
                     ]);
                 });
                 return response()->json();
@@ -175,6 +188,14 @@ class UserController extends Controller
                 }
 
                 $userItem->save();
+
+                // ログテーブル登録処理
+                ItemLogs::create([
+                    'user_id' => $request->user_id,
+                    'item_id' => $request->item_id,
+                    'option_id' => $request->option_id,
+                    'allie_count' => $request->allie_amount
+                ]);
             });
             return response()->json();
         } catch (Exception $e) {
@@ -235,6 +256,13 @@ class UserController extends Controller
                     'user_id' => $request->user_id,
                     'following_user_id' => $request->following_user_id,
                 ]);
+
+                // ログテーブル登録処理
+                FollowLogs::create([
+                    'user_id' => $request->user_id,
+                    'target_user_id' => $request->following_user_id,
+                    'action' => 1
+                ]);
             });
 
             return response()->json();
@@ -264,6 +292,13 @@ class UserController extends Controller
                 // 削除処理
                 FollowingUser::where('user_id', '=', $request->user_id)->where('following_user_id', '=',
                     $request->following_user_id)->delete();
+
+                // ログテーブル登録処理
+                FollowLogs::create([
+                    'user_id' => $request->user_id,
+                    'target_user_id' => $request->following_user_id,
+                    'action' => 0
+                ]);
             });
             return response()->json();
         } catch (Exception $e) {
@@ -276,7 +311,21 @@ class UserController extends Controller
     {
         $user = User::findOrFail($request->user_id);
         $mails = $user->mails;
-        return response()->json($mails);
+
+        foreach ($mails as $mail) {
+            $frag = MailLogs::where('user_id', '=', $request->user_id)->where("mail_id", "=", $mail->mail_id)->exists();
+            // ログに未登録の受信メールの場合
+            if (!$frag) {
+                // ログテーブル登録処理
+                MailLogs::create([
+                    'user_id' => $request->user_id,
+                    'mail_id' => $mail->mail_id,
+                    'action' => 0
+                ]);
+            }
+        }
+
+        return response()->json(UserMailResource::collection($mails));
     }
 
     // 受信メール開封
@@ -295,7 +344,7 @@ class UserController extends Controller
         User::findOrFail($request->user_id);
 
         // レコード存在チェック・受け取り済みかどうかチェック
-        $userMail = Received_Mail::where('user_id', '=', $request->user_id)->where("mail_id", "=",
+        $userMail = UserMail::where('user_id', '=', $request->user_id)->where("mail_id", "=",
             $request->mail_id)->get()->first();
         if (empty($userMail)) {
             abort(404);
@@ -316,12 +365,12 @@ class UserController extends Controller
                     foreach ($attachedItems as $item) {
 
                         // 今回受け取るアイテムに関するレコードが、所持アイテムテーブルに存在するかチェック
-                        $userItem = Inventory_Item::where('user_id', '=', $request->user_id)->where('item_id', '=',
+                        $userItem = UserItem::where('user_id', '=', $request->user_id)->where('item_id', '=',
                             $item->item_id)->get()->first();
 
                         // アイテムを所持していない場合は登録する
                         if (empty($userItem)) {
-                            Inventory_Item::create([
+                            UserItem::create([
                                 'user_id' => $request->user_id,
                                 'item_id' => $item->item_id,
                                 'amount' => $item->amount,
@@ -337,6 +386,13 @@ class UserController extends Controller
                 // 受信メールを開封済みにする
                 $userMail->is_received = 1;
                 $userMail->save();
+
+                // ログテーブル登録処理
+                MailLogs::create([
+                    'user_id' => $request->user_id,
+                    'mail_id' => $request->mail_id,
+                    'action' => 1
+                ]);
 
             });
             return response()->json();
