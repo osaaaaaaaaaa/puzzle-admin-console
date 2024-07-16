@@ -10,15 +10,15 @@ Accept: application/json
 GET http://localhost:8000/api/users/index?min_level=30&max_level=60
 Accept: application/json
 
-### アイテムリスト
-GET http://localhost:8000/api/users/item/show?user_id=1
+### 所持アイテムリスト取得
+GET http://localhost:8000/api/users/item/show?user_id=5
 Accept: application/json
 
-### フォローリスト
+### フォローリスト取得
 GET http://localhost:8000/api/users/follow/show?user_id=1
 Accept: application/json
 
-### メールリスト
+### 受信メールリスト取得
 GET http://localhost:8000/api/users/mail/show?user_id=1
 Accept: application/json
 
@@ -34,7 +34,7 @@ Accept: application/json
 //  [POST] Content-Type ... リクエスト本体がJSONという宣言
 //**********************************************************
 
-### ユーザー登録
+### ユーザー情報登録
 POST http://localhost:8000/api/users/store
 Content-Type: application/json
 Accept: application/json
@@ -46,14 +46,28 @@ Accept: application/json
     "life": 1
 }
 
-### ユーザー更新
+### ユーザー情報更新
 POST http://localhost:8000/api/users/update
 Content-Type: application/json
 Accept: application/json
 
 {
     "user_id": 11,
-    "name": "oldプレイヤー"
+    "name": "oldプレイヤー",
+    "level": 10,
+    "exp": 123,
+    "life": 3
+}
+
+### 所持アイテム更新
+POST http://localhost:8000/api/users/item/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 11,
+    "item_id": 2,
+    "allie_amount": -2
 }
 
 ### フォロー登録
@@ -76,23 +90,12 @@ Accept: application/json
     "following_user_id": 6
 }
 
-### 所持アイテム更新
-POST http://localhost:8000/api/users/item/update
-Content-Type: application/json
-Accept: application/json
-
-{
-    "user_id": 11,
-    "item_id": 2,
-    "allie_amount": -2
-}
-
-### 受信メール開封(+アイテム受け取り)
+### 受信メール開封
 POST http://localhost:8000/api/users/mail/update
 Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 11,
-    "mail_id": 3
+    "user_id": 1,
+    "mail_id": 1
 }

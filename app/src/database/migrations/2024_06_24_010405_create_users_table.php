@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->timestamps();
 
             // ユニーク制約設定
-            $table->unique('name');
+            $table->index('name');
         });
     }
 
