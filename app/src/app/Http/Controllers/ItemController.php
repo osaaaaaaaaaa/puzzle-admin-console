@@ -13,11 +13,10 @@ use Illuminate\Support\Facades\DB;
 class ItemController
 {
     // アイテム一覧表示
-    public function items_index(Request $request)
+    public function index(Request $request)
     {
         // アカウントテーブルから全てのレコードを取得する
         $items = Item::paginate(20);
-        Debugbar::info($items);
         return view('items/index', ['items' => $items]);
     }
 }

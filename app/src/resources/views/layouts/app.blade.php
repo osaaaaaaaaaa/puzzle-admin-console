@@ -24,6 +24,8 @@
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('levels.index')}}">レベル一覧表示</a></li>
                         </ul>
                     </div>
                 </li>
@@ -40,6 +42,20 @@
                             <li><a class="dropdown-item" href="{{ route('logs.follow')}}">フォローログ一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('logs.item')}}">アイテムログ一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('logs.mail')}}">メールログ一覧</a></li>
+                        </ul>
+                    </div>
+                </li>
+                {{--救難信号--}}
+                <li>
+                    <div class="dropdown">
+                        <!-- 切替ボタンの設定 -->
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            救難信号
+                        </a>
+                        <!-- ドロップメニューの設定 -->
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('items.index')}}">一覧表示</a></li>
                         </ul>
                     </div>
                 </li>

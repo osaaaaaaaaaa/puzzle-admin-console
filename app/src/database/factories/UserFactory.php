@@ -22,9 +22,7 @@ class UserFactory extends Factory
         $scheduled_data = $this->faker->dateTimeBetween('+1day', '+1year'); // 日付をランダム生成
         return [
             'name' => $this->faker->unique()->name(),
-            'level' => $this->faker->numberBetween(1, 99),
             'exp' => $this->faker->randomNumber(5),
-            'life' => $this->faker->randomNumber(1),
             'created_at' => $scheduled_data->format('Y-m-d H:i:s'),
             'updated_at' => $scheduled_data->modify('+1 hour')->format('Y-m-d H:i:s')
         ];

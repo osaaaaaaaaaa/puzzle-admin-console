@@ -7,16 +7,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('levels', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 20);  // 名前
-            $table->integer('exp');            // 経験値
+            $table->integer('level');
+            $table->integer('exp');
             $table->timestamps();
+
+            // インデックス設定
+            $table->index('exp');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('levels');
     }
 };

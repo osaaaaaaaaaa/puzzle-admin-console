@@ -29,7 +29,6 @@
                         <th>ユーザー名</th>
                         <th>レベル</th>
                         <th>経験値</th>
-                        <th>ライフ</th>
                     </tr>
                     </thead>
                     <tbody class="table-light">
@@ -38,9 +37,8 @@
                             <tr>
                                 <td>{{$data['id']}}</td>
                                 <td>{{$data['name']}}</td>
-                                <td>{{$data['level']}}</td>
+                                <td>作業中</td>
                                 <td>{{$data['exp']}}</td>
-                                <td>{{$data['life']}}</td>
                             </tr>
                         @endforeach
                     @endif
