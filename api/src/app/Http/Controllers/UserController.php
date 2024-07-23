@@ -21,22 +21,6 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-    // レベル指定でユーザー情報取得
-    public function index(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'min_level' => ['required', 'int', 'min:1'],
-            'max_level' => ['required', 'int', 'min:1'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-
-        $users = User::where('level', '>', $request->min_level)->where("level", "<", $request->max_level)->get();
-        return response()->json(UserResource::collection($users), 200);
-    }
-
     // ユーザー情報取得
     public function show(Request $request)
     {

@@ -6,10 +6,6 @@
 GET http://48.218.74.87/api/users/1
 Accept: application/json
 
-### ユーザー情報取得2(レベル指定)
-GET http://localhost:8000/api/users/index?min_level=30&max_level=60
-Accept: application/json
-
 ### 所持アイテムリスト取得
 GET http://localhost:8000/api/users/item/show?user_id=5
 Accept: application/json
