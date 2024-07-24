@@ -3,25 +3,23 @@
 @section('body')
     <div class="container my-3">
         <main>
-            <div class="py-5 pt-5 text-center">
-                <h2 class="pt-5">メール送信</h2>
+            <div class="py-5 pt-5 ">
+                <h1 class="pt-5">■ メール送信</h1>
             </div>
             <div class="row">
                 <div>
-                    <h4 class="mb-3">メール作成</h4>
                     <form class="needs-validation" method="post" action="{{ route('mails.store')}}">
                         @csrf
                         <label for="target"
                                class="form-label">送信先のユーザーIDを入力(全ユーザー指定のIDは0)</label>
                         <div class="col-md-2 py-1">
                             <input type="number" id="target" name="target_id" class="form-control" min="0" max="<?php
-                                                      if (!empty($userMax)) {
-                                                          echo $userMax;
-                                                      }else{
-                                                          echo 0;
-                                                      }
-                                                      ?>"
-                                   value="0" required>
+                                if (!empty($userMax)) {
+                                    echo $userMax;
+                                }else{
+                                    echo 0;
+                                }
+                                ?>" value="0" required>
                         </div>
                         <br>
                         <div class="col-md-12">

@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->id();
             $table->integer("user_id");         // ホストユーザーのID
             $table->integer("stage_id");        // ステージID
-            $table->integer("guest_num");       // 現在のゲストの人数
             $table->integer("action");          // 進捗状況 [0:挑戦中,1:ゲームクリア]
             $table->timestamps();
         });

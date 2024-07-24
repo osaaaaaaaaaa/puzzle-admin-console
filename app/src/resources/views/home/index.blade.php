@@ -19,13 +19,18 @@
             </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-boxes home-icon"></i>
-                <h4 class="fw-normal">アチーブメント一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('items.index')}}">View details »</a></p>
+                <h4 class="fw-normal">レベル一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('levels.index')}}">View details »</a></p>
             </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-boxes home-icon"></i>
-                <h4 class="fw-normal">レベル一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('levels.index')}}">View details »</a></p>
+                <h4 class="fw-normal">アチーブメント一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('achievements.index')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">アチーブメント作成</h4>
+                <p><a class="btn btn-primary" href="{{ route('achievements.create')}}">View details »</a></p>
             </div>
         </div>
         <br>
@@ -53,9 +58,9 @@
         <h1 class="mt-5 mb-5 pb-2 border-bottom border-4">■ 救難信号データ管理</h1>
         <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
-                <i class="bi bi-database home-icon"></i>
+                <i class="bi bi-clipboard-data home-icon"></i>
                 <h4 class="fw-normal">救難信号一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('logs.follow')}}">View details »</a></p>
+                <p><a class="btn btn-primary" href="{{ route('distresssignals.index')}}">View details »</a></p>
             </div>
         </div>
         <br>
@@ -82,17 +87,10 @@
                 <h4 class="fw-normal">受信メール一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('users.mail')}}">View details »</a></p>
             </div>
-        </div>
-        <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
-            <div class="col-md-2 border rounded-3 bg-body-tertiary">
-                <i class="bi bi-people-fill home-icon"></i>
-                <h4 class="fw-normal">プロフィール一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('users.index')}}">View details »</a></p>
-            </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-people-fill home-icon"></i>
                 <h4 class="fw-normal">アチーブメントの達成状況一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('users.index')}}">View details »</a></p>
+                <p><a class="btn btn-primary" href="{{ route('users.achievement')}}">View details »</a></p>
             </div>
         </div>
         <br>
@@ -111,6 +109,7 @@
             </div>
         </div>
         <br>
+        <!--メール管理-->
         <h1 class="mt-5 mb-5 pb-2 border-bottom border-4">■ メール管理</h1>
         <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
             <div class="col-md-2 border rounded-3 bg-body-tertiary">

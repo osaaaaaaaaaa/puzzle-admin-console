@@ -2,27 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Achievement;
 use App\Models\FollowingUser;
+use App\Models\Level;
 use App\Models\User;
+use App\Models\UserAchievement;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Support\Facades\Validator;
 
 class UserController
 {
     // ユーザー一覧表示
     public function index(Request $request)
     {
-        // アカウント名の指定があるかどうか
-        if (empty($request->id)) {// 指定がない場合
-            // アカウントテーブルから全てのレコードを取得する
-            $users = User::paginate(20);
-            return view('users/index', ['users' => $users]);
-        } else {// 指定がある場合
-            // 条件指定してレコードを取得する
-            $users = User::where('id', '=', $request->id)->paginate(20);
-            return view('users/index', ['users' => $users, 'name' => $request->name]);
+        // モデルを取得する
+        $user = User::find($request->id);
+
+        // リレーション
+        if (!empty($user)) {
+            // ユーザーのレベルを取得
+            $level = Level::where('exp', '<=', $user->exp)
+                ->orderBy('level', 'desc')->first();
+
+            // 設定しているアチーブメントのタイトルを取得する
+            $achievement = $user->index()->selectRaw('title')->first();
+
+            // 最大レベルを超えている場合
+            if (empty($level)) {
+                $level = Level::max('level');
+            }
+
+            if (empty($achievement)) {
+                $achievement = '';
+            }
         }
+
+        return view('users/index',
+            ['user' => $user ?? null, 'level' => $level ?? null, 'achievement' => $achievement ?? null]);
     }
 
     // インベントリのアイテム一覧表示
@@ -75,5 +92,15 @@ class UserController
         }
 
         return view('users/follow', ['user' => $user ?? null, 'following_users' => $following_users ?? null]);
+    }
+
+    // アチーブメントの達成状況
+    public function achievement(Request $request)
+    {
+        // モデルを取得する
+        $achievements = UserAchievement::where('user_id', '=', $request->id)->paginate(10);
+        $user = User::find($request->id);
+
+        return view('users/achievement', ['user' => $user ?? null, 'achievements' => $achievements ?? null]);
     }
 }

@@ -24,8 +24,11 @@
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
-                            <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
                             <li><a class="dropdown-item" href="{{ route('levels.index')}}">レベル一覧表示</a></li>
+                            <li><a class="dropdown-item"
+                                   href="{{ route('achievements.index')}}">アチーブメント一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('achievements.create')}}">アチーブメント作成</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -55,7 +58,7 @@
                         </a>
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('items.index')}}">一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('distresssignals.index')}}">一覧表示</a></li>
                         </ul>
                     </div>
                 </li>
@@ -73,6 +76,8 @@
                             <li><a class="dropdown-item" href="{{ route('users.item')}}">所持アイテム</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.follow')}}">フォロー一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('users.mail')}}">受信メール</a></li>
+                            <li><a class="dropdown-item"
+                                   href="{{ route('users.achievement')}}">アチーブメント達成状況</a></li>
                         </ul>
                     </div>
                 </li>

@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('title','UserList')
+@section('title','UserAchievementList')
 @section('body')
     <div class="container p-5">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="pt-5 pb-3">■ ユーザー一覧</h1>
+                <h1 class="pt-5 pb-3">■ アチーブメントの達成状況一覧</h1>
                 <form class="d-flex pb-3" role="search" method="get"
-                      action="{{ route('users.index.show')}}">
+                      action="{{ route('users.achievement.show')}}">
                     @csrf
                     <div class="row">
                         <div class="col-md-8">
@@ -27,22 +27,24 @@
                     <tr>
                         <th>ID</th>
                         <th>ユーザー名</th>
-                        <th>レベル</th>
-                        <th>経験値</th>
-                        <th>称号</th>
-                        <th>最新のステージ</th>
+                        <th>アチーブメントID</th>
+                        <th>進捗値</th>
+                        <th>達成したかどうか</th>
+                        <th>更新日</th>
                     </tr>
                     </thead>
                     <tbody class="table-light">
-                    @if(!empty($level))
-                        <tr>
-                            <td>{{$user->id}}</td>
-                            <td>{{$user->name}}</td>
-                            <td>{{$level->level}}</td>
-                            <td>{{$user->exp}}</td>
-                            <td>{{$achievement->title}}</td>
-                            <td>{{$user->stage_id}}</td>
-                        </tr>
+                    @if(!empty($achievements))
+                        @foreach($achievements as $achievement)
+                            <tr>
+                                <td>{{$achievement->id}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$achievement->achievement_id}}</td>
+                                <td>{{$achievement->progress_val}}</td>
+                                <td>{{$achievement->is_achieved}}</td>
+                                <td>{{$achievement->updated_at}}</td>
+                            </tr>
+                        @endforeach
                     @endif
                     </tbody>
                 </table>

@@ -23,6 +23,8 @@ class UserFactory extends Factory
         return [
             'name' => $this->faker->unique()->name(),
             'exp' => $this->faker->randomNumber(5),
+            'achievement_id' => $this->faker->numberBetween(0, 5),
+            'stage_id' => $this->faker->numberBetween(1, 31),
             'created_at' => $scheduled_data->format('Y-m-d H:i:s'),
             'updated_at' => $scheduled_data->modify('+1 hour')->format('Y-m-d H:i:s')
         ];

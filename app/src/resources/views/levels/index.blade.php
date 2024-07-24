@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','ItemList')
+@section('title','LevelList')
 @section('body')
     <div class="container p-5">
         <div class="row">

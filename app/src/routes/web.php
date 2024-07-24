@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DistressSignalController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\LogsController;
@@ -31,8 +33,16 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     // [ マスタデータ ] ##########################################################################
 
     Route::prefix('')->middleware([AuthMiddleware::class])->group(function () {
-        Route::get('items/index', [ItemController::class, 'index'])->name('items.index');     // アイテム一覧表示
-        Route::get('levels/index', [LevelController::class, 'index'])->name('levels.index');   // レベル一覧表示
+        // アイテム一覧表示
+        Route::get('items/index', [ItemController::class, 'index'])->name('items.index');
+        // レベル一覧表示
+        Route::get('levels/index', [LevelController::class, 'index'])->name('levels.index');
+        // アチーブメント一覧表示
+        Route::get('achievements/index', [AchievementController::class, 'index'])->name('achievements.index');
+        // アチーブメント作成ページ
+        Route::get('achievements/create', [AchievementController::class, 'create'])->name('achievements.create');
+        // アチーブメント作成処理
+        Route::get('achievements/store', [AchievementController::class, 'store'])->name('achievements.store');
     });
 
 
@@ -58,11 +68,15 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     // [ 救難信号データ ] ##########################################################################
 
-//    Route::prefix('mails')->name('mails.')->controller(MailController::class)
-//        ->middleware([AuthMiddleware::class])->group(function () {
-//            Route::get('/index', 'index')->name('index');         // メール一覧表示
-//            Route::get('/create', 'create')->name('create');      // メール送信画面表示
-//        });
+    Route::prefix('distresssignals')->name('distresssignals.')->controller(DistressSignalController::class)
+        ->middleware([AuthMiddleware::class])->group(function () {
+            // 救難信号一覧表示
+            Route::get('/index', 'index')->name('index');
+        });
+
+    // 救難信号一覧表示(検索用)
+    Route::get('distresssignals/index/{action?}',
+        [DistressSignalController::class, 'index'])->name('distresssignals.index.show');
 
 
     // [ ユーザーデータ ] ##########################################################################
@@ -77,6 +91,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('follow', 'follow')->name('follow');
             // インベントリアイテム一覧表示
             Route::get('item', 'item')->name('item');
+            // アチーブメントの達成状況一覧表示
+            Route::get('achievement', 'achievement')->name('achievement');
         });
 
     // ユーザー一覧表示(検索用)
@@ -85,10 +101,10 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     Route::get('users/item/{id?}', [UserController::class, 'item'])->name('users.item.show');
     // フォロー一覧表示(検索用)
     Route::get('users/follow/{id?}', [UserController::class, 'follow'])->name('users.follow.show');
-    // メール作成・送信処理
-    Route::post('mails/store', [MailController::class, 'store'])->name('mails.store');
     // 受信メール一覧表示(検索用)
     Route::get('users/mail/{id?}', [UserController::class, 'mail'])->name('users.mail.show');
+    // アチーブメントの達成状況一覧表示(検索用)
+    Route::get('users/achievement/{id?}', [UserController::class, 'achievement'])->name('users.achievement.show');
 
 
     // [ アカウント ] ##########################################################################
@@ -116,6 +132,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
         ->middleware([AuthMiddleware::class])->group(function () {
             Route::get('/index', 'index')->name('index');         // メール一覧表示
             Route::get('/create', 'create')->name('create');      // メール送信画面表示
+            // メール作成・送信処理
+            Route::post('/store', 'store')->name('store');
         });
 
 });

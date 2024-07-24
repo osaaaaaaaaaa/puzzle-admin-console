@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attached_Item;
 use App\Models\Item;
 use App\Models\Mail;
-use App\Models\Received_Mail;
+use App\Models\UserMail;
 use App\Models\User;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
@@ -18,13 +18,12 @@ class MailController extends Controller
     public function index(Request $request)
     {
 
-        $currentPage = $request->page === null ? 1 : $request->page;        // 現在のページ数
+        $currentPage = $request->page === null ? 1 : $request->page;       // 現在のページ数
         $recordMax = 10;                                                    // １ページに表示する最大件数
-        $min = $currentPage > 1 ? ($currentPage - 1) * $recordMax : 0;      // レコードを取得する範囲(最小)
-        $max = $currentPage * $recordMax;                                   // レコードを取得する範囲(最大)
+        $min = $currentPage > 1 ? ($currentPage - 1) * $recordMax : 0;     // レコードを取得する開始位置
 
         // メールマスタ取得する(１ページにつき$recordMax件表示する)
-        $mails = Mail::where('id', '>', '' . $min)->where('id', '<=', '' . $max)->get();
+        $mails = Mail::offset($min)->limit($recordMax)->get();
         // 最大件数を取得する
         $mailsCnt = Mail::count();
         // 最終的なデータを格納する
@@ -59,6 +58,15 @@ class MailController extends Controller
             array('path' => '/mails/index'));
 
         return view('mails/index', ['mailData' => $view_mails]);
+
+        // LengthAwarePaginatorについて
+        //        [表示するコレクション] = new LengthAwarePaginator(
+        //            [表示するコレクション]->forPage([現在のページ番号],[1ページ当たりの表示数]),
+        //            [コレクションの大きさ],
+        //            [1ページ当たりの表示数],
+        //            [現在のページ番号],
+        //            [オプション(ここでは"ページの遷移先パス")]
+        //        );
     }
 
     // メール送信ページの表示
@@ -114,12 +122,12 @@ class MailController extends Controller
             // 全ユーザー指定の場合
             $users = User::paginate(20);
             foreach ($users as $user) {
-                Received_Mail::create(['user_id' => $user['id'], 'mail_id' => ($mailID_max + 1), 'is_received' => 0]);
+                UserMail::create(['user_id' => $user['id'], 'mail_id' => ($mailID_max + 1), 'is_received' => 0]);
             }
             Debugbar::info('全ユーザー指定');
         } else {
             // 特定のユーザー指定の場合
-            Received_Mail::create([
+            UserMail::create([
                 'user_id' => $request->target_id,
                 'mail_id' => ($mailID_max + 1),
                 'is_received' => 0

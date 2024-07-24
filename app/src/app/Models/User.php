@@ -14,6 +14,12 @@ class User extends Model
         'id',
     ];
 
+    // インデックス(アチーブメント)のリレーション
+    public function index()
+    {
+        return $this->hasMany(Achievement::class, 'id');
+    }
+
     // 所持アイテムのリレーション
     public function items()
     {

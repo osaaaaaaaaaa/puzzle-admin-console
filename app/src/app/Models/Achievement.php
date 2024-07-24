@@ -10,4 +10,11 @@ class Achievement extends Model
     protected $guarded = [
         'id',
     ];
+
+    // アイテムのリレーション
+    public function items()
+    {
+        // 第二引数：子モデルのカラム,第三引数：親モデルのカラム
+        return $this->hasMany(Item::class, 'id', 'item_id');
+    }
 }

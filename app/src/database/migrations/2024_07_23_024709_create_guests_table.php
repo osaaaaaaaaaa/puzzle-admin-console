@@ -13,7 +13,6 @@ return new class extends Migration {
             $table->integer("user_id");             // ゲストユーザーのID
             $table->string("position");             // 配置したXY座標(json文字列)
             $table->string("vector");               // ベクトルXY座標(json文字列)
-            $table->boolean("is_placed");           // 配置が完了したかどうか
             $table->timestamps();
 
             // インデックス設定

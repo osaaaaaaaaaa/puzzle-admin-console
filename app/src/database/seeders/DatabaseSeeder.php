@@ -24,5 +24,11 @@ class DatabaseSeeder extends Seeder
         $this->call(FollowLogsTableSeeder::class);
         $this->call(ItemLogsTableSeeder::class);
         $this->call(MailLogsTableSeeder::class);
+        $this->call(LevelTableSeeder::class);
+        $this->call(AchievementTableSeeder::class);
+        $this->call(UserAchievementTableSeeder::class);
+        $this->call(DistressSignalTableSeeder::class);
+        $this->call(GuestTableSeeder::class);
+        $this->call(ReplayTableSeeder::class);
     }
 }
