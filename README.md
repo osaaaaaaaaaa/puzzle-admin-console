@@ -10,7 +10,7 @@
 ---------------------------------------------------
 
 ## ER図
-![うさぎ写真](https://img.freepik.com/free-photo/easter-celebration-with-dreamy-bunny_23-2151246705.jpg?t=st=1721950879~exp=1721954479~hmac=ee8183c9ed2991c5fc1cff222c37bfa6ac06288f64b34c0d817ee7bdc477a730&w=996)
+![パズルゲームER図](https://github.com/user-attachments/assets/6b71e7f2-bd1a-47ff-99f6-71405dc33f94)
 
 ## 作成する管理ツールの機能
 * マスタデータ管理
