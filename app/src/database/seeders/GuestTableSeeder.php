@@ -14,6 +14,7 @@ class GuestTableSeeder extends Seeder
             'user_id' => 1,
             'position' => '',
             'vector' => '',
+            'is_rewarded' => 0
         ]);
     }
 }

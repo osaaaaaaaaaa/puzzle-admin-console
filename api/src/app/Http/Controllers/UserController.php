@@ -10,6 +10,7 @@ use App\Models\Attached_Item;
 use App\Models\FollowingUser;
 use App\Models\FollowLogs;
 use App\Models\ItemLogs;
+use App\Models\Level;
 use App\Models\MailLogs;
 use App\Models\User;
 use App\Models\UserItem;
@@ -25,7 +26,31 @@ class UserController extends Controller
     public function show(Request $request)
     {
         $user = User::findOrFail($request->user_id);
-        return response()->json(UserResource::make($user));
+
+        if (!empty($user)) {
+            // ユーザーのレベルを取得
+            $level = Level::where('exp', '<=', $user->exp)
+                ->orderBy('level', 'desc')->first();
+
+            // 設定しているアチーブメントの称号を取得する
+            $achievement = $user->achievements()->selectRaw('title')->first();
+
+            // 最大レベルを超えている場合
+            if (empty($level)) {
+                $level = Level::max('level');
+            }
+
+            // 称号が空の場合
+            if (empty($achievement->title)) {
+                $achievement->title = '';
+            }
+
+            $response['user'] = UserResource::make($user);
+            $response['level'] = $level->level;
+            $response['title'] = $achievement->title;
+        }
+
+        return response()->json($response);
     }
 
     // ユーザー情報登録

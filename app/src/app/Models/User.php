@@ -14,8 +14,8 @@ class User extends Model
         'id',
     ];
 
-    // インデックス(アチーブメント)のリレーション
-    public function index()
+    // アチーブメントの称号を取得するリレーション
+    public function achievements()
     {
         return $this->hasMany(Achievement::class, 'id');
     }

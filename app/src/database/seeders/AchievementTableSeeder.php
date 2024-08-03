@@ -12,7 +12,7 @@ class AchievementTableSeeder extends Seeder
         Achievement::create([
             'title' => '',
             'text' => 'レベルを10に上げる',
-            'type' => 1,
+            'type' => 2,
             'achieved_val' => 10,
             'item_id' => 2,
             'item_amount' => 3

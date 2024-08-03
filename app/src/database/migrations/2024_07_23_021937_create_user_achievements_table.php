@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->integer('user_id');         // ユーザーID
             $table->integer('achievement_id');  // アチーブメントID
             $table->integer('progress_val');    // 進捗の値
-            $table->boolean('is_achieved');     // 達成したかどうか
+            $table->boolean('is_receive_item');     // アイテムを受け取ったかどうか
             $table->timestamps();
 
             // インデックス設定

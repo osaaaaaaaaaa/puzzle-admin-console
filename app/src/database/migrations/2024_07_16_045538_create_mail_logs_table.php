@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->timestamps();
 
             // インデックス追加
-            $table->index(['user_id', 'mail_id']);
+            $table->index('user_id');
+            $table->index('mail_id');
         });
     }
 

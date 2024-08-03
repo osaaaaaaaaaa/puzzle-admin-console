@@ -19,22 +19,22 @@ class UserController
         // モデルを取得する
         $user = User::find($request->id);
 
-        // リレーション
         if (!empty($user)) {
             // ユーザーのレベルを取得
             $level = Level::where('exp', '<=', $user->exp)
                 ->orderBy('level', 'desc')->first();
 
-            // 設定しているアチーブメントのタイトルを取得する
-            $achievement = $user->index()->selectRaw('title')->first();
+            // 設定しているアチーブメントの称号を取得する
+            $achievement = $user->achievements()->selectRaw('title')->first();
 
             // 最大レベルを超えている場合
             if (empty($level)) {
                 $level = Level::max('level');
             }
 
-            if (empty($achievement)) {
-                $achievement = '';
+            // 称号が空の場合
+            if (empty($achievement->title)) {
+                $achievement->title = '';
             }
         }
 
@@ -98,9 +98,23 @@ class UserController
     public function achievement(Request $request)
     {
         // モデルを取得する
-        $achievements = UserAchievement::where('user_id', '=', $request->id)->paginate(10);
+        $user_achievements = UserAchievement::where('user_id', '=', $request->id)->paginate(10);
         $user = User::find($request->id);
 
-        return view('users/achievement', ['user' => $user ?? null, 'achievements' => $achievements ?? null]);
+        for ($i = 0; $i < count($user_achievements); $i++) {
+            // アチーブメントマスタを取得
+            $achievement = Achievement::find($user_achievements[$i]->achievement_id);
+            
+            // 条件値に達しているかどうかチェック
+            if (!empty($achievement)) {
+                if ($achievement->achieved_val <= $user_achievements[$i]->progress_val) {
+                    $user_achievements[$i]->is_achieved = 1;
+                } else {
+                    $user_achievements[$i]->is_achieved = 0;
+                }
+            }
+        }
+
+        return view('users/achievement', ['user' => $user ?? null, 'achievements' => $user_achievements ?? null]);
     }
 }

@@ -13,8 +13,8 @@ return new class extends Migration {
             $table->integer('following_user_id');    // 相手のユーザーID
             $table->timestamps();
 
-            // インデックス追加
-            $table->index(['user_id', 'following_user_id']);
+            // 複合ユニーク制約
+            $table->unique(['user_id', 'following_user_id']);
         });
     }
 

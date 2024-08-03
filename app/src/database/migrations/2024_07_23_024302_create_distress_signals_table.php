@@ -13,6 +13,10 @@ return new class extends Migration {
             $table->integer("stage_id");        // ステージID
             $table->integer("action");          // 進捗状況 [0:挑戦中,1:ゲームクリア]
             $table->timestamps();
+
+            // インデックス設定
+            $table->index('user_id');
+            $table->index('stage_id');
         });
     }
 

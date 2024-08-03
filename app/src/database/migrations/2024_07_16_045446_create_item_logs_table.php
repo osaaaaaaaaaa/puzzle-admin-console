@@ -16,7 +16,9 @@ return new class extends Migration {
             $table->timestamps();
 
             // インデックス追加
-            $table->index(['user_id', 'item_id', 'option_id']);
+            $table->index('user_id');
+            $table->index('item_id');
+            $table->index('option_id');
         });
     }
 

@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->integer('mail_id');
             $table->timestamps();
 
-            $table->index(['item_id', 'mail_id']);
+            // ユニーク制約
+            $table->index('item_id', 'mail_id');
         });
     }
 

@@ -1,0 +1,18 @@
+//********************************
+//  アチーブメント用
+//********************************
+
+### アチーブメントマスタと達成状況取得
+GET http://localhost:8000/api/achievements?user_id=2
+Accept: application/json
+
+### アチーブメント達成状況更新
+POST http://localhost:8000/api/users/achievements/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 2,
+    "type": 1,
+    "allie_val": 3
+}

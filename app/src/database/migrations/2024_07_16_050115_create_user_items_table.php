@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->integer('amount');
             $table->timestamps();
 
-            // ユニーク制約設定
+            // 複合ユニーク制約
             $table->unique(['user_id', 'item_id']);
         });
     }
