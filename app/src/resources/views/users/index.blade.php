@@ -27,8 +27,6 @@
                     <tr>
                         <th>ID</th>
                         <th>ユーザー名</th>
-                        <th>レベル</th>
-                        <th>経験値</th>
                         <th>称号</th>
                         <th>最新のステージ</th>
                     </tr>
@@ -38,8 +36,6 @@
                         <tr>
                             <td>{{$user->id}}</td>
                             <td>{{$user->name}}</td>
-                            <td>{{$level->level}}</td>
-                            <td>{{$user->exp}}</td>
                             <td>{{$achievement->title}}</td>
                             <td>{{$user->stage_id}}</td>
                         </tr>

@@ -15,7 +15,7 @@ class User extends Model
     // アチーブメントの称号を取得するリレーション
     public function achievements()
     {
-        return $this->hasMany(Achievement::class, 'id');
+        return $this->hasMany(Achievement::class, 'id', 'achievement_id');
     }
 
     // 所持アイテムのリレーション

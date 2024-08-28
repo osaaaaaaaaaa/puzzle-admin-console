@@ -19,11 +19,6 @@
             </div>
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-boxes home-icon"></i>
-                <h4 class="fw-normal">レベル一覧</h4>
-                <p><a class="btn btn-primary" href="{{ route('levels.index')}}">View details »</a></p>
-            </div>
-            <div class="col-md-2 border rounded-3 bg-body-tertiary">
-                <i class="bi bi-boxes home-icon"></i>
                 <h4 class="fw-normal">アチーブメント一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('achievements.index')}}">View details »</a></p>
             </div>

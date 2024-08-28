@@ -13,7 +13,7 @@ class User extends Model
     protected $guarded = [
         'id',
     ];
-
+    
     // アチーブメントの称号を取得するリレーション
     public function achievements()
     {

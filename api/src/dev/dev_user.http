@@ -2,8 +2,8 @@
 //  GETリクエスト || application/json ... htmlでのエラーを返されないようにする
 //************************************************************************************
 
-### ユーザー情報取得1(ID指定)
-GET http://localhost:8000/api/users/1
+### ユーザー情報取得
+GET http://localhost:8000/api/users/show?user_id=1
 Accept: application/json
 
 ### 所持アイテムリスト取得
@@ -30,6 +30,14 @@ Accept: application/json
 GET http://localhost:8000/api/logs/follow?user_id=1
 Accept: application/json
 
+### ランキング取得
+GET http://localhost:8000/api/users/ranking/show?user_id=1
+Accept: application/json
+
+### フォロー内でランキング取得
+GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
+Accept: application/json
+
 //**********************************************************
 //  POSTリクエスト || Content-Type ... リクエスト本体がJSONという宣言
 //**********************************************************
@@ -40,10 +48,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "name": "プレイヤー12341234",
-    "level": 1,
-    "exp": 0,
-    "life": 1
+    "name": "22222"
 }
 
 ### ユーザー情報更新
@@ -53,10 +58,10 @@ Accept: application/json
 
 {
     "user_id": 11,
-    "name": "oldプレイヤー",
-    "level": 10,
-    "exp": 123,
-    "life": 3
+    "name": "プレイヤーTEST1",
+    "achievement_id": 0,
+    "stage_id": 1,
+    "icon_id": 1
 }
 
 ### 所持アイテム更新
@@ -99,4 +104,15 @@ Accept: application/json
 {
     "user_id": 1,
     "mail_id": 1
+}
+
+### ステージリザルト更新
+POST http://localhost:8000/api/users/stage/result/update
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 1,
+    "stage_id": 1,
+    "score": 200
 }

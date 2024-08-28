@@ -24,7 +24,6 @@
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
-                            <li><a class="dropdown-item" href="{{ route('levels.index')}}">レベル一覧表示</a></li>
                             <li><a class="dropdown-item"
                                    href="{{ route('achievements.index')}}">アチーブメント一覧表示</a></li>
                             <li><a class="dropdown-item" href="{{ route('achievements.create')}}">アチーブメント作成</a>

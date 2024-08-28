@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Achievement;
 use App\Models\FollowingUser;
-use App\Models\Level;
 use App\Models\User;
 use App\Models\UserAchievement;
 use Illuminate\Http\Request;
@@ -20,17 +19,8 @@ class UserController
         $user = User::find($request->id);
 
         if (!empty($user)) {
-            // ユーザーのレベルを取得
-            $level = Level::where('exp', '<=', $user->exp)
-                ->orderBy('level', 'desc')->first();
-
             // 設定しているアチーブメントの称号を取得する
             $achievement = $user->achievements()->selectRaw('title')->first();
-
-            // 最大レベルを超えている場合
-            if (empty($level)) {
-                $level = Level::max('level');
-            }
 
             // 称号が空の場合
             if (empty($achievement->title)) {
@@ -39,7 +29,7 @@ class UserController
         }
 
         return view('users/index',
-            ['user' => $user ?? null, 'level' => $level ?? null, 'achievement' => $achievement ?? null]);
+            ['user' => $user ?? null, 'achievement' => $achievement ?? null]);
     }
 
     // インベントリのアイテム一覧表示
@@ -104,7 +94,7 @@ class UserController
         for ($i = 0; $i < count($user_achievements); $i++) {
             // アチーブメントマスタを取得
             $achievement = Achievement::find($user_achievements[$i]->achievement_id);
-            
+
             // 条件値に達しているかどうかチェック
             if (!empty($achievement)) {
                 if ($achievement->achieved_val <= $user_achievements[$i]->progress_val) {

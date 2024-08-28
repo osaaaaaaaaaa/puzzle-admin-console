@@ -17,9 +17,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     Route::prefix('users')->name('users.')->controller(UserController::class)
         ->group(function () {
             // ユーザー情報取得・登録・更新
-            Route::get('/index', 'index')->name('index');
-            Route::get('/{user_id}', 'show')->name('show');
-            Route::post('store', 'store')->name('store');
+            Route::get('/show', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
             Route::post('/update', 'update')->name('update');
 
             // フォローリスト取得・登録・解除
@@ -34,6 +33,13 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // メールリスト取得・開封
             Route::get('/mail/show', 'showMail')->name('mail.show');
             Route::post('/mail/update', 'updateMail')->name('mail.update');
+
+            // ステージリザルト更新
+            Route::post('/stage/result/update', 'updateStageResult')->name('stage.result.update');
+
+            // ランキング取得・フォロー内でのランキング取得
+            Route::get('/ranking/show', 'showRanking')->name('ranking.show');
+            Route::get('/follow/ranking/show', 'showFollowRanking')->name('follow.ranking.index');
         });
 
     // アチーブメントの達成状況更新

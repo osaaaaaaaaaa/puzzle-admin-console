@@ -15,6 +15,9 @@ use Exception;
 
 class DistressSignalController extends Controller
 {
+    // ゲストが参加できる人数
+    const GUEST_CNT_MAX = 2;
+
     // 発信中の救難信号取得
     public function index(Request $request)
     {
@@ -51,13 +54,24 @@ class DistressSignalController extends Controller
         User::findOrFail($request->user_id);
 
         // JOINで使うサブクエリを作成する
-        $sub_query = DB::raw('(SELECT COUNT(*) AS cnt, distress_signal_id FROM guests GROUP BY distress_signal_id) AS sub_query_guests');
+        $sub_query_guest_cnt = DB::raw('(SELECT COUNT(*) AS cnt, distress_signal_id FROM guests GROUP BY distress_signal_id) AS sq_cnt_guests');
 
-        // 参加ゲストの人数が3未満&自信が参加していない救難信号レコードをランダムに最大10個まで取得する
-        $d_signals = Guest::selectRaw("d_signals.user_id,d_signals.id AS d_signal_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),d_signals.created_at) AS elapsed_days")
-            ->join('distress_signals AS d_signals', 'guests.distress_signal_id', '=', 'd_signals.id')
-            ->leftjoin($sub_query, 'd_signals.id', '=', 'sub_query_guests.distress_signal_id')
-            ->where('d_signals.user_id', '!=', $request->user_id)
+        // 自身が発信していない && ゲストとして参加していない && 未クリア && 参加ゲストの人数がMAX未満の救難信号レコードをランダムに最大10個まで取得する
+        $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
+            ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
+            ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
+            ->where([
+                ['guests.user_id', '!=', $request->user_id],             // ①ゲストとして参加していない
+                ['distress_signals.user_id', '!=', $request->user_id],   // ②自身が発信していない
+                ['distress_signals.action', '=', 0],                     // ③未クリア
+            ])
+            ->orWhere([
+                ['guests.user_id', '=', null],                           // ④上の①に当てはまるものがない場合
+                ['distress_signals.user_id', '!=', $request->user_id],   // ⑤自身が発信していない
+                ['distress_signals.action', '=', 0],                     // ⑥未クリア
+            ])
+            ->having('cnt_guest', '<', self::GUEST_CNT_MAX)
+            ->limit(10)
             ->get();
 
         return response()->json($d_signals);

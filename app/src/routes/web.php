@@ -35,8 +35,6 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     Route::prefix('')->middleware([AuthMiddleware::class])->group(function () {
         // アイテム一覧表示
         Route::get('items/index', [ItemController::class, 'index'])->name('items.index');
-        // レベル一覧表示
-        Route::get('levels/index', [LevelController::class, 'index'])->name('levels.index');
         // アチーブメント一覧表示
         Route::get('achievements/index', [AchievementController::class, 'index'])->name('achievements.index');
         // アチーブメント作成ページ
