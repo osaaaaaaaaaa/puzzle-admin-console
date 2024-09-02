@@ -26,6 +26,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::post('/follow/store', 'storeFollow')->name('follow.store');
             Route::post('/follow/destroy', 'destroyFollow')->name('follow.destroy');
 
+            // おすすめのユーザーリスト取得
+            Route::get('/recommended/show', 'showRecommendedUser')->name('recommended.show');
+
             // 所持アイテムリスト取得・更新
             Route::get('/item/show', 'showItem')->name('item.show');
             Route::post('/item/update', 'updateItem')->name('item.update');
@@ -34,8 +37,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('/mail/show', 'showMail')->name('mail.show');
             Route::post('/mail/update', 'updateMail')->name('mail.update');
 
-            // ステージリザルト更新
-            Route::post('/stage/result/update', 'updateStageResult')->name('stage.result.update');
+            // ステージリザルト取得・更新
+            Route::get('/stage/result/show', 'showStageResult')->name('stage.result.show');
+            Route::post('/stage/clear/update', 'updateStageClear')->name('stage.clear.update');
 
             // ランキング取得・フォロー内でのランキング取得
             Route::get('/ranking/show', 'showRanking')->name('ranking.show');

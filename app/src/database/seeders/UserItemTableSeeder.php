@@ -13,17 +13,12 @@ class UserItemTableSeeder extends Seeder
             UserItem::create([
                 'user_id' => $i,
                 'item_id' => 1,
-                'amount' => rand(0, 100)
-            ]);
-            UserItem::create([
-                'user_id' => $i,
-                'item_id' => 2,
-                'amount' => rand(0, 100)
+                'amount' => 1
             ]);
             UserItem::create([
                 'user_id' => $i,
                 'item_id' => 3,
-                'amount' => rand(0, 100)
+                'amount' => 1
             ]);
         }
     }

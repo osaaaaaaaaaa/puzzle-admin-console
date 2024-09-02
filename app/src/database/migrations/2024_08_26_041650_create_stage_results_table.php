@@ -11,10 +11,13 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');
             $table->integer('stage_id');
+            $table->boolean('is_medal1');
+            $table->boolean('is_medal2');
             $table->integer('score');
             $table->timestamps();
 
             // ユニーク制約
+            $table->unique(['user_id', 'stage_id']);
             $table->index('user_id');
             $table->index('stage_id');
         });

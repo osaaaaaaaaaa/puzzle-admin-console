@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StageResultResource;
 use App\Http\Resources\UserFollowResource;
 use App\Http\Resources\UserItemResource;
 use App\Http\Resources\UserMailResource;
+use App\Http\Resources\UserRecommendedResource;
 use App\Http\Resources\UserResource;
 use App\Models\Achievement;
 use App\Models\Attached_Item;
 use App\Models\FollowingUser;
 use App\Models\FollowLogs;
+use App\Models\Item;
 use App\Models\ItemLogs;
 use App\Models\Level;
 use App\Models\MailLogs;
+use App\Models\NGWord;
 use App\Models\StageResult;
 use App\Models\User;
 use App\Models\UserItem;
@@ -25,6 +29,9 @@ use Symfony\Component\ErrorHandler\Debug;
 
 class UserController extends Controller
 {
+    const FOLLOW_LIMIT_MAX = 30;
+    const STAGE_LIMIT_MAX = 22;
+
     // ユーザー情報取得
     public function show(Request $request)
     {
@@ -48,13 +55,17 @@ class UserController extends Controller
             }
         }
 
+        // 合計スコアを取得する
+        $total_score = $user->totalscore()->first() == null ? 0 : $user->totalscore()->pluck('total_score')->first();
+
         // 返す値をまとめる
         $response = [
             'name' => $user->name,
             'achievement_id' => $user->achievement_id,
             'title' => $title,
             'stage_id' => $user->stage_id,
-            'icon_id' => $user->icon_id
+            'icon_id' => $user->icon_id,
+            'score' => $total_score,
         ];
 
         return response()->json($response);
@@ -83,6 +94,26 @@ class UserController extends Controller
                     'icon_id' => 1
                 ]);
 
+                // 初期アイテム取得
+                $items = Item::where('id', '=', 1)->orWhere('id', '=', 3)->get();
+
+                foreach ($items as $item) {
+                    // 所持アイテムに追加
+                    UserItem::create([
+                        'user_id' => $user->id,
+                        'item_id' => $item->id,
+                        'amount' => 1,
+                    ]);
+
+                    // アイテムログテーブル登録処理
+                    ItemLogs::create([
+                        'user_id' => $user->id,
+                        'item_id' => $item->id,
+                        'option_id' => 1,
+                        'allie_count' => 1
+                    ]);
+                }
+
                 return $user;
             });
             return response()->json(['user_id' => $user->id]);
@@ -102,7 +133,6 @@ class UserController extends Controller
             'stage_id' => ['required', 'integer'],
             'icon_id' => ['required', 'integer'],
         ]);
-
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
@@ -112,7 +142,17 @@ class UserController extends Controller
         $achievement = Achievement::where('id', '=', $request->achievement_id)->first();
         if ($request->achievement_id != 0 && empty($achievement)) {
             // ID指定が0以外 && 存在しない場合
-            return response()->json(['error' => 'Achievement not found'], 404);
+            return response()->json(['error' => "アチーブメントが存在しません"], 400);
+        }
+
+        // NGワードチェック
+        $replaceName = str_replace(["　", " "], "", $request->name);  // 全角・半角スペース削除
+        $ngWords = NGWord::pluck('word')->toArray();
+        foreach ($ngWords as $ngWord) {
+            if (stripos($replaceName, $ngWord) !== false) {
+                // NGワードが含まれている場合の処理
+                return response()->json(['error' => "使用できないワードが含まれています：" . $ngWord], 400);
+            }
         }
 
         try {
@@ -133,11 +173,26 @@ class UserController extends Controller
     // 所持アイテムリスト取得
     public function showItem(Request $request)
     {
-        // JSON文字列にして返す
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'user_id' => ['int', 'min:1'],
+            'type' => ['int'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // 存在チェック
         $user = User::findOrFail($request->user_id);
-        $items = $user->items;  // リレーション
-        $response['items'] = UserItemResource::collection($items);
-        return response()->json($response);
+
+        // タイプ指定がない場合は全て取得する
+        if (empty($request->type)) {
+            $items = $user->items;
+        } else {
+            $items = $user->items->where('type', '=', $request->type);
+        }
+
+        return response()->json(UserItemResource::collection($items));
     }
 
     // 所持アイテム更新
@@ -236,14 +291,103 @@ class UserController extends Controller
             return response()->json(UserFollowResource::collection($following_users));
         }
 
-        // 相互フォローかどうかの情報を格納する
+        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($following_users); $i++) {
+
+            // アチーブメントの称号取得処理
+            $title = '';
+            if ($following_users[$i]->achievement_id > 0) {
+                $achievement = Achievement::selectRaw('title')
+                    ->where('id', '=', $following_users[$i]->achievement_id)
+                    ->first();
+                if (!empty($achievement->title)) {
+                    $title = $achievement->title;
+                }
+            }
+            $following_users[$i]['title'] = $title;
+
+            // 合計スコアを取得する
+            $following_users[$i]['score'] = StageResult::selectRaw('SUM(score) AS total_score')
+                ->where('stage_results.user_id', '=', $following_users[$i]->id)->first();
+            $following_users[$i]['score'] = empty($following_users[$i]['score']['total_score']) ? 0 : $following_users[$i]['score']->total_score;
+
+            // 相互フォローかどうかの判定処理
             $isFollow = FollowingUser::where('user_id', '=', $following_users[$i]->id)
                 ->where('following_user_id', '=', $user->id)->exists();
             $following_users[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
         }
 
         return response()->json(UserFollowResource::collection($following_users));
+    }
+
+    // おすすめのユーザー取得
+    public function showRecommendedUser(Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+
+        // 自分がフォローを返していないユーザーを取得する
+        $followers = [];
+        $tmp_followers = User::whereIn('id', function ($query) use ($user) {
+            $query->select('user_id')
+                ->from('following_users')
+                ->where('following_user_id', '=', $user->id);
+        })->get();
+        foreach ($tmp_followers as $follower) {
+            $isAgreement = FollowingUser::where('user_id', '=', $user->id)
+                ->where('following_user_id', '=', $follower->id)->exists();
+
+            if (!$isAgreement) {
+                // 相互フォローではないユーザー情報を格納する
+                $follower->is_follower = 1;
+                $followers[] = $follower;
+            }
+        }
+
+        // 自分がフォローしているユーザー・フォロワーを除外して検索する[ステージIDが近い || 始めた時期が近いプレイヤー]
+        $recommended_users = User::
+        where('id', '!=', $user->id)
+            ->whereNotIn('id', $tmp_followers->pluck('id'))
+            ->whereNotIn('id', function ($query) use ($user) {
+                $query->select('following_user_id')
+                    ->from('following_users')
+                    ->where('user_id', '=', $user->id);
+            })
+            ->where(function ($query) use ($user) {
+                $query->whereBetween('stage_id', [$user->stage_id - 10, $user->stage_id + 10])
+                    ->orWhereBetween('created_at', [$user->created_at->subDays(14), $user->created_at->addDays(14)]);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->toArray();
+
+        // 配列を結合してユーザーの情報をまとめる
+        $users = array_merge($followers, $recommended_users);
+
+        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        for ($i = 0; $i < count($users); $i++) {
+
+            // アチーブメントの称号取得処理
+            $title = '';
+            if ($users[$i]['achievement_id'] > 0) {
+                $achievement = Achievement::selectRaw('title')
+                    ->where('id', '=', $users[$i]['achievement_id'])
+                    ->first();
+                if (!empty($achievement->title)) {
+                    $title = $achievement->title;
+                }
+            }
+            $users[$i]['title'] = $title;
+
+            // 合計スコアを取得する
+            $users[$i]['score'] = StageResult::selectRaw('SUM(score) AS total_score')
+                ->where('stage_results.user_id', '=', $users[$i]['id'])->first();
+            $users[$i]['score'] = empty($users[$i]['score']['total_score']) ? 0 : $users[$i]['score']['total_score'];
+
+            // フォロワーかどうか
+            $users[$i]['is_follower'] = !empty($users[$i]['is_follower']) === true ? 1 : 0;
+        }
+
+        return response()->json(UserRecommendedResource::collection($users));
     }
 
     // フォロー登録
@@ -258,8 +402,16 @@ class UserController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        // フォロー対象のユーザーが存在するかどうか
-        User::findOrFail($request->user_id);
+        // ユーザーが存在するかどうか
+        $user = User::findOrFail($request->user_id);
+        User::findOrFail($request->following_user_id);
+
+        // フォローしている人数が上限に達していないかチェック
+        $follow_cnt = FollowingUser::selectRaw('COUNT(*) AS total_following')
+            ->where('user_id', '=', $user->id)->first();
+        if ($follow_cnt['total_following'] >= self::FOLLOW_LIMIT_MAX) {
+            return response()->json(['error' => "フォローした人数が上限に達しています"], 400);
+        }
 
         // フォロー済みかどうか
         $frag = FollowingUser::where('user_id', '=', $request->user_id)->where("following_user_id", "=",
@@ -421,13 +573,39 @@ class UserController extends Controller
         }
     }
 
-    // ステージリザルト更新
-    public function updateStageResult(Request $request)
+    // ステージリザルト取得
+    public function showStageResult(Request $request)
+    {
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'user_id' => ['int', 'min:1'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // 存在チェック
+        $user = User::findOrFail($request->user_id);
+
+
+        // ステージリザルト取得のリレーション
+        $result = $user->stageResult()->get();
+        if (empty($result)) {
+            return response()->json(['error' => "リザルトがない"], 400);
+        }
+
+        return response()->json(StageResultResource::collection($result));
+    }
+
+    // ステージクリア処理
+    public function updateStageClear(Request $request)
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
             'user_id' => ['int', 'required'],       // ユーザーID
             'stage_id' => ['int', 'required'],      // ステージID
+            'is_medal1' => ['boolean', 'required'], // メダル１を取得したかどうか
+            'is_medal2' => ['boolean', 'required'], // メダル２を取得したかどうか
             'score' => ['int', 'required']          // 更新する値
         ]);
         if ($validator->fails()) {
@@ -435,27 +613,40 @@ class UserController extends Controller
         }
 
         // ユーザーの存在チェック
-        User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user_id);
 
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request) {
+            $response = DB::transaction(function () use ($request, $user) {
 
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $stage_result = StageResult::firstOrCreate(
                     ['user_id' => $request->user_id, 'stage_id' => $request->stage_id],    // 検索する条件値
-                    ['score' => $request->score]   // 生成するときに代入するカラム
+                    [
+                        'is_medal1' => $request->is_medal1,
+                        'is_medal2' => $request->is_medal2,
+                        'score' => $request->score
+                    ]   // 生成するときに代入するカラム
                 );
+
+                // メダルを初獲得したかどうかチェック
+                $stage_result->is_medal1 = !$stage_result->is_medal1 && $request->is_medal1 ? 1 : $stage_result->is_medal1;
+                $stage_result->is_medal2 = !$stage_result->is_medal2 && $request->is_medal2 ? 1 : $stage_result->is_medal2;
 
                 // 今回のスコアが高い場合は更新する
                 if ($stage_result->score < $request->score) {
                     $stage_result->score = $request->score;
                 }
-
                 $stage_result->save();
+
+                // ステージが初クリア&&ステージ上限値以下の場合はユーザーのステージIDを加算する
+                $user->stage_id += $request->stage_id == $user->stage_id && $user->stage_id < self::STAGE_LIMIT_MAX ? 1 : 0;
+                $user->save();
+
+                return StageResultResource::make($stage_result);
             });
 
-            return response()->json();
+            return response()->json($response);
 
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

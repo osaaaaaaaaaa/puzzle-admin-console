@@ -9,10 +9,10 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 20);  // 名前
+            $table->string('name', 128); // 名前
             $table->integer('achievement_id'); // 設定しているアチーブメントID
-            $table->integer('stage_id');       // 最新のステージID
             $table->integer('icon_id');        // アイコンID
+            $table->integer('stage_id');       // 最新のステージID
             $table->timestamps();
         });
     }
