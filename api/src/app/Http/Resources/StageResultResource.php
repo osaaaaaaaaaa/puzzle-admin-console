@@ -5,18 +5,15 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserFollowResource extends JsonResource
+class StageResultResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'user_id' => $this->id,
-            'following_user_name' => $this->name,
-            'title' => $this->title,
             'stage_id' => $this->stage_id,
-            'icon_id' => $this->icon_id,
+            'is_medal1' => $this->is_medal1,
+            'is_medal2' => $this->is_medal2,
             'score' => $this->score,
-            'is_agreement' => $this->is_agreement
         ];
     }
 }

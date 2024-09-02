@@ -12,6 +12,19 @@ class User extends Model
         'id',
     ];
 
+    // ステージリザルトのリレーション
+    public function stageresult()
+    {
+        return $this->hasMany(Stageresult::class, 'user_id', 'id');
+    }
+
+    // 合計スコアを取得するリレーション
+    public function totalscore()
+    {
+        return $this->hasMany(StageResult::class, 'user_id', 'id')
+            ->selectRaw('SUM(score) AS total_score')->groupBy('user_id');
+    }
+
     // アチーブメントの称号を取得するリレーション
     public function achievements()
     {
@@ -24,7 +37,7 @@ class User extends Model
         // 中間テーブルに関する複数行を取得
         return $this->belongsToMany(
         // 第二モデル , 第三テーブル , 第一モデルと関係のあるカラム , 第二モデルと関係のあるカラム
-            Item::class, 'inventory__items', 'user_id', 'item_id')
+            Item::class, 'user_items', 'user_id', 'item_id')
             ->withPivot('amount');  // 中間テーブルのカラムを取得
     }
 

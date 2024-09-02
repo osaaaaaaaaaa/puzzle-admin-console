@@ -11,6 +11,7 @@ class UserItemResource extends JsonResource
     {
         return [
             'item_id' => $this->pivot->item_id,
+            'effect' => $this->effect,
             'amount' => $this->pivot->amount
         ];
     }

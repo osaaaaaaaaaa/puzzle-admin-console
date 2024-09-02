@@ -3,15 +3,19 @@
 //************************************************************************************
 
 ### ユーザー情報取得
-GET http://localhost:8000/api/users/show?user_id=1
+GET http://localhost:8000/api/users/show?user_id=10
 Accept: application/json
 
 ### 所持アイテムリスト取得
-GET http://localhost:8000/api/users/item/show?user_id=5
+GET http://localhost:8000/api/users/item/show?user_id=1&type=1
 Accept: application/json
 
 ### フォローリスト取得
 GET http://localhost:8000/api/users/follow/show?user_id=1
+Accept: application/json
+
+### おすすめのユーザーリスト取得
+GET http://localhost:8000/api/users/recommended/show?user_id=11
 Accept: application/json
 
 ### 受信メールリスト取得
@@ -38,6 +42,10 @@ Accept: application/json
 GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
+### ステージリザルト取得
+GET http://localhost:8000/api/users/stage/result/show?user_id=1
+Accept: application/json
+
 //**********************************************************
 //  POSTリクエスト || Content-Type ... リクエスト本体がJSONという宣言
 //**********************************************************
@@ -57,8 +65,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 11,
-    "name": "プレイヤーTEST1",
+    "user_id": 10,
+    "name": "test",
     "achievement_id": 0,
     "stage_id": 1,
     "icon_id": 1
@@ -73,7 +81,7 @@ Accept: application/json
     "user_id": 5,
     "item_id": 1,
     "option_id": 1,
-    "allie_amount": 2
+    "allie_amount": 1
 }
 
 ### フォロー登録
@@ -82,8 +90,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 5,
-    "following_user_id": 6
+    "user_id": 11,
+    "following_user_id": 3
 }
 
 ### フォロー解除
@@ -92,8 +100,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 5,
-    "following_user_id": 6
+    "user_id": 11,
+    "following_user_id": 5
 }
 
 ### 受信メール開封
@@ -106,13 +114,15 @@ Accept: application/json
     "mail_id": 1
 }
 
-### ステージリザルト更新
-POST http://localhost:8000/api/users/stage/result/update
+### ステージクリア処理
+POST http://localhost:8000/api/users/stage/clear/update
 Content-Type: application/json
 Accept: application/json
 
 {
     "user_id": 1,
-    "stage_id": 1,
-    "score": 200
+    "stage_id": 5,
+    "is_medal1": 0,
+    "is_medal2": 0,
+    "score": 500
 }

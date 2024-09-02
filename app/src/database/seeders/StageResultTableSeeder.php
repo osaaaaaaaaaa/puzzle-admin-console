@@ -9,55 +9,16 @@ class StageResultTableSeeder extends Seeder
 {
     public function run(): void
     {
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
-        StageResult::create([
-            'user_id' => mt_rand(1, 10),
-            'stage_id' => mt_rand(1, 40),
-            'score' => mt_rand(1, 1000)
-        ]);
+        for ($i = 1; $i <= 10; $i++) {
+            for ($j = 1; $j <= 10; $j++) {
+                StageResult::create([
+                    'user_id' => $i,
+                    'is_medal1' => mt_rand(0, 1),
+                    'is_medal2' => mt_rand(0, 1),
+                    'stage_id' => $j,
+                    'score' => mt_rand(1, 1000)
+                ]);
+            }
+        }
     }
 }

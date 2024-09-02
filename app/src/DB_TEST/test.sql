@@ -3,10 +3,6 @@ use admin_console;
 
 show tables;
 
-select * from users;
-
-select * from achievements;
-
 # 自身が発信していない && 自身が参加していない && ゲストの参加人数が2人未満の救難信号をランダムに10件まで取得
 SELECT d_signals.id AS d_signal_id,d_signals.user_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest, d_signals.created_at from distress_signals AS d_signals
 LEFT JOIN guests AS guest1 ON distress_signal_id = d_signals.id
@@ -78,3 +74,12 @@ GROUP BY sr.user_id LIMIT 999;
 SELECT * FROM users
 INNER JOIN following_users ON users.id = following_users.following_user_id
 where following_users.user_id = 1;
+
+
+# [ おすすめのユーザーの取得 ] ##################################################
+
+# 自身をフォローしているユーザー
+SELECT * FROM following_users where following_user_id = 2;
+
+# 自分がフォローしているユーザーを取得
+SELECT * FROM following_users WHERE user_id = 1;
