@@ -330,6 +330,7 @@ class UserController extends Controller
         $tmp_followers = User::whereIn('id', function ($query) use ($user) {
             $query->select('user_id')
                 ->from('following_users')
+                ->inRandomOrder()
                 ->where('following_user_id', '=', $user->id);
         })->get();
         foreach ($tmp_followers as $follower) {
@@ -356,12 +357,18 @@ class UserController extends Controller
                 $query->whereBetween('stage_id', [$user->stage_id - 10, $user->stage_id + 10])
                     ->orWhereBetween('created_at', [$user->created_at->subDays(14), $user->created_at->addDays(14)]);
             })
-            ->orderBy('updated_at', 'desc')
+            ->inRandomOrder()
+            ->limit(30)
             ->get()
             ->toArray();
 
         // 配列を結合してユーザーの情報をまとめる
         $users = array_merge($followers, $recommended_users);
+
+        // 指定した件目以降のデータを消す
+        if (count($users) > self::FOLLOW_LIMIT_MAX) {
+            array_splice($users, self::FOLLOW_LIMIT_MAX, count($users) - self::FOLLOW_LIMIT_MAX);
+        }
 
         // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($users); $i++) {
@@ -587,7 +594,6 @@ class UserController extends Controller
         // 存在チェック
         $user = User::findOrFail($request->user_id);
 
-
         // ステージリザルト取得のリレーション
         $result = $user->stageResult()->get();
         if (empty($result)) {
@@ -606,6 +612,7 @@ class UserController extends Controller
             'stage_id' => ['int', 'required'],      // ステージID
             'is_medal1' => ['boolean', 'required'], // メダル１を取得したかどうか
             'is_medal2' => ['boolean', 'required'], // メダル２を取得したかどうか
+            'time' => ['numeric', 'required'],       // 時間
             'score' => ['int', 'required']          // 更新する値
         ]);
         if ($validator->fails()) {
@@ -625,6 +632,7 @@ class UserController extends Controller
                     [
                         'is_medal1' => $request->is_medal1,
                         'is_medal2' => $request->is_medal2,
+                        'time' => $request->time,
                         'score' => $request->score
                     ]   // 生成するときに代入するカラム
                 );
@@ -632,10 +640,10 @@ class UserController extends Controller
                 // メダルを初獲得したかどうかチェック
                 $stage_result->is_medal1 = !$stage_result->is_medal1 && $request->is_medal1 ? 1 : $stage_result->is_medal1;
                 $stage_result->is_medal2 = !$stage_result->is_medal2 && $request->is_medal2 ? 1 : $stage_result->is_medal2;
-
                 // 今回のスコアが高い場合は更新する
-                if ($stage_result->score < $request->score) {
+                if ($request->score > $stage_result->score) {
                     $stage_result->score = $request->score;
+                    $stage_result->time = $request->time;
                 }
                 $stage_result->save();
 
@@ -656,61 +664,74 @@ class UserController extends Controller
     // ランキング取得
     public function showRanking(Request $request)
     {
-        User::findOrFail($request->user_id);
-
-        // ユーザーのリザルトを取得する
-        $userResult = StageResult::selectRaw("user_id,name,achievement_id,SUM(score) AS total")
-            ->join('users', 'users.id', '=', 'stage_results.user_id')
-            ->where('users.id', '=', $request->user_id)
-            ->groupBy('stage_results.user_id')
-            ->first();
+        $user = User::findOrFail($request->user_id);
 
         // ランキング上位の情報を取得する
-        $results = StageResult::selectRaw("user_id,name,achievement_id,SUM(score) AS total")
+        $results = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
             ->join('users', 'users.id', '=', 'stage_results.user_id')
+            ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
             ->groupBy("stage_results.user_id")
-            ->orderBy('total', 'desc')
+            ->orderBy('score', 'desc')
             ->limit(100)
-            ->get();
+            ->get()->toArray();
 
-        // 返すデータをまとめる
-        $response = [
-            "results" => $results,
-            "mydata" => $userResult,
-        ];
+        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        for ($i = 0; $i < count($results); $i++) {
+            // 相互フォローかどうかの判定処理
+            $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
+                ->where('following_user_id', '=', $user->id)->exists();
+            $results[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+        }
 
-        return response()->json($response);
+        return response()->json($results);
     }
 
     // フォロー内でのランキング
     public function showFollowRanking(Request $request)
     {
-        User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user_id);
+
 
         // ユーザーのリザルトを取得する
-        $userResult = StageResult::selectRaw("user_id,name,achievement_id,SUM(score) AS total")
-            ->join('users', 'users.id', '=', 'stage_results.user_id')
-            ->where('users.id', '=', $request->user_id)
-            ->groupBy('stage_results.user_id')
-            ->first()
-            ->attributesToArray();
+        $userFrag = StageResult::where('user_id', '=', $request->user_id)->exists();
 
+        if ($userFrag) {
+            $userResult = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
+                ->join('users', 'users.id', '=', 'stage_results.user_id')
+                ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
+                ->where('users.id', '=', $request->user_id)
+                ->groupBy('stage_results.user_id')
+                ->first()
+                ->attributesToArray();
+            $userResult['is_agreement'] = 0;
+        }
         // フォロー内でランキング上位の情報を取得する
-        $results = StageResult::selectRaw("stage_results.user_id,name,achievement_id,SUM(score) AS total")
+        $results = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
             ->join('users', 'users.id', '=', 'stage_results.user_id')
             ->join('following_users AS fu', 'users.id', '=', 'fu.following_user_id')
+            ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
             ->where('fu.user_id', '=', $request->user_id)
             ->groupBy("stage_results.user_id")
-            ->orderBy('total', 'desc')
+            ->orderBy('score', 'desc')
             ->limit(100)
             ->get()
             ->toArray();    // 取得するときに配列に変換する
 
-        // 返すデータをまとめる
-        $results[] = $userResult;
+        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        for ($i = 0; $i < count($results); $i++) {
+            // 相互フォローかどうかの判定処理
+            $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
+                ->where('following_user_id', '=', $user->id)->exists();
+            $results[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+        }
 
-        // totalを基準に降順に並び替える
-        $totalArray = array_column($results, 'total');
+        if ($userFrag) {
+            // 返すデータをまとめる
+            $results[] = $userResult;
+        }
+
+        // scoreを基準に降順に並び替える
+        $totalArray = array_column($results, 'score');
         array_multisort($totalArray, SORT_DESC, $results);
 
         return response()->json($results);
