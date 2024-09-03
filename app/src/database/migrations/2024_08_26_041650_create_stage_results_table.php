@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->integer('stage_id');
             $table->boolean('is_medal1');
             $table->boolean('is_medal2');
+            $table->float('time');
             $table->integer('score');
             $table->timestamps();
 
