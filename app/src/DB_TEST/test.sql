@@ -31,7 +31,7 @@ AND type = 1 AND user_id = 2 AND is_achieved = 0
 ORDER BY id;
 
 # typeとuser_idを指定してまだ達成していないアチーブメントを取得する
-SELECT achievements.id AS id, achieved_val, IFNULL(progress_val,0), is_achieved AS is_arrive FROM achievements
+SELECT achievements.id AS id, achieved_val, IFNULL(progress_val,''), is_achieved AS is_arrive FROM achievements
 LEFT JOIN user_achievements ON user_achievements.achievement_id = achievements.id
 AND user_id = 2
 WHERE type = 1 AND (is_achieved = 0 OR is_achieved IS NULL);
@@ -83,3 +83,7 @@ SELECT * FROM following_users where following_user_id = 2;
 
 # 自分がフォローしているユーザーを取得
 SELECT * FROM following_users WHERE user_id = 1;
+
+# [ ランキング ] ###############################################################
+
+

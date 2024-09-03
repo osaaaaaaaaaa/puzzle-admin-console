@@ -13,6 +13,7 @@ class StageResultResource extends JsonResource
             'stage_id' => $this->stage_id,
             'is_medal1' => $this->is_medal1,
             'is_medal2' => $this->is_medal2,
+            'time' => $this->time,
             'score' => $this->score,
         ];
     }
