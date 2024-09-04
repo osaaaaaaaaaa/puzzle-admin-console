@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/ranking/show?user_id=1
 Accept: application/json
 
 ### フォロー内でランキング取得
-GET http://localhost:8000/api/users/follow/ranking/show?user_id=11
+GET http://localhost:8000/api/users/follow/ranking/show?user_id=21
 Accept: application/json
 
 ### ステージリザルト取得
