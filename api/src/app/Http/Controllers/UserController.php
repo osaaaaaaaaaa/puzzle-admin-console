@@ -675,7 +675,7 @@ class UserController extends Controller
             ->limit(100)
             ->get()->toArray();
 
-        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        // 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($results); $i++) {
             // 相互フォローかどうかの判定処理
             $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
@@ -717,7 +717,7 @@ class UserController extends Controller
             ->get()
             ->toArray();    // 取得するときに配列に変換する
 
-        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        // 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($results); $i++) {
             // 相互フォローかどうかの判定処理
             $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])

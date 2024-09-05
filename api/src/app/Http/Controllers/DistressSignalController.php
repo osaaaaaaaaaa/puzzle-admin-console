@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ReplayResource;
 use App\Models\DistressSignal;
+use App\Models\FollowingUser;
 use App\Models\Guest;
 use App\Models\Replay;
 use App\Models\User;
@@ -51,13 +52,13 @@ class DistressSignalController extends Controller
         }
 
         // ユーザーの存在チェック
-        User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user_id);
 
         // JOINで使うサブクエリを作成する
         $sub_query_guest_cnt = DB::raw('(SELECT COUNT(*) AS cnt, distress_signal_id FROM guests GROUP BY distress_signal_id) AS sq_cnt_guests');
 
         // 自身が発信していない && ゲストとして参加していない && 未クリア && 参加ゲストの人数がMAX未満の救難信号レコードをランダムに最大10個まで取得する
-        $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
+        $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
             ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
             ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
             ->where([
@@ -74,6 +75,21 @@ class DistressSignalController extends Controller
             ->limit(10)
             ->get();
 
+        // ホストのユーザー情報取得 (重複したレコードは省略されるため、collectionで取得する)
+        $idList = $d_signals->pluck('user_id')->toArray();
+        $users = collect($idList)->map(function ($item) {
+            return User::find($item);
+        });
+        for ($i = 0; $i < count($users); $i++) {
+            $d_signals[$i]['host_name'] = $users[$i]->name;
+            $d_signals[$i]['icon_id'] = $users[$i]->icon_id;
+
+            // 相互フォローかどうかの判定処理
+            $isFollow = FollowingUser::where('user_id', '=', $d_signals[$i]['user_id'])
+                ->where('following_user_id', '=', $user->id)->exists();
+            $d_signals[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+        }
+
         return response()->json($d_signals);
     }
 
@@ -84,7 +100,6 @@ class DistressSignalController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => ['int', 'min:1', 'required'],
             'stage_id' => ['int', 'min:1', 'required'],
-            'action' => ['boolean', 'required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -104,15 +119,15 @@ class DistressSignalController extends Controller
 
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request) {
+            $d_signal = DB::transaction(function () use ($request) {
                 // 登録処理
-                DistressSignal::create([
+                return DistressSignal::create([
                     'user_id' => $request->user_id,
                     'stage_id' => $request->stage_id,
-                    'action' => $request->action
+                    'action' => 0
                 ]);
             });
-            return response()->json();
+            return response()->json(['d_signal_id' => $d_signal->id, 'stage_id' => $d_signal->stage_id]);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -239,61 +254,112 @@ class DistressSignalController extends Controller
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
             'user_id' => ['int', 'min:1', 'required'],
-            'position' => ['string'],
-            'vector' => ['string'],
+            'position' => ['required'],
+            'vector' => ['required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        // 指定した救難信号が存在チェック
-        $d_signal = DistressSignal::findOrFail($request->d_signal_id);
-
         // 既にゲームクリアしている場合はエラーを返す
+        $d_signal = DistressSignal::findOrFail($request->d_signal_id);
         if ($d_signal->action == 1) {
-            abort(404);
+            return response()->json(['error' => "クリア済み"], 400);
         }
 
-        // モデル取得
-        $guest = Guest::where('user_id', '=', $request->user_id)
-            ->where('distress_signal_id', '=', $request->d_signal_id)->first();
+        // この救難信号に参加していないユーザーは、救難信号の参加人数がMAXの場合エラーを返される
+        $exists = Guest::where('user_id', '=', $request->user_id)->where('distress_signal_id', '=',
+            $request->d_signal_id)->exists();
+        if (!$exists) {
+            $guest_cnt = Guest::where('distress_signal_id', '=', $request->d_signal_id)->count();
+            if ($guest_cnt >= self::GUEST_CNT_MAX) {
+                return response()->json(['error' => "参加人数がMAX"], 400);
+            }
+        }
 
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request, $guest, $d_signal) {
-                // 更新するゲストレコードが存在しない場合
-                if (empty($guest)) {
-
-                    // 現在の参加人数が上限に達している場合はエラー
-                    $guest_cnt = Guest::where('distress_signal_id', '=', $request->d_signal_id)->count();
-                    if ($guest_cnt >= 3) {
-                        abort(404);
-                    }
-
-                    // 登録処理
-                    Guest::create([
-                        'distress_signal_id' => $request->d_signal_id,
-                        'user_id' => $request->user_id,
-                        'position' => '',
-                        'vector' => '',
+            DB::transaction(function () use ($request) {
+                // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
+                $guest = Guest::firstOrCreate(
+                    ['user_id' => $request->user_id, 'distress_signal_id' => $request->d_signal_id],    // 検索する条件値
+                    [
+                        'position' => $request->position,
+                        'vector' => $request->vector,
                         'is_rewarded' => 0,
-                    ]);
-                } // 存在する場合は更新処理
-                else {
-                    if (!empty($request->position)) {
-                        $guest->position = $request->position;
-                    }
-                    if (!empty($request->vector)) {
-                        $guest->vector = $request->vector;
-                    }
-                    $guest->save();
-                }
+                    ]   // 生成するときに代入するカラム
+                );
+
+                $guest->position = $request->position;
+                $guest->vector = $request->vector;
+                $guest->save();
+
+                /*                // 更新するゲストレコードが存在しない場合(初回登録の処理)
+                                if (empty($guest)) {
+
+                                    // 現在の参加人数が上限に達している場合はエラー
+                                    $guest_cnt = Guest::where('distress_signal_id', '=', $request->d_signal_id)->count();
+                                    if ($guest_cnt >= self::GUEST_CNT_MAX) {
+                                        abort(404);
+                                    }
+
+                                    // 登録処理
+                                    Guest::create([
+                                        'distress_signal_id' => $request->d_signal_id,
+                                        'user_id' => $request->user_id,
+                                        'position' => '',
+                                        'vector' => '',
+                                        'is_rewarded' => 0,
+                                    ]);
+                                } // 存在する場合は更新処理
+                                else {
+                                    if (!empty($request->position)) {
+                                        $guest->position = $request->position;
+                                    }
+                                    if (!empty($request->vector)) {
+                                        $guest->vector = $request->vector;
+                                    }
+                                    $guest->save();
+                                }*/
             });
             return response()->json();
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    // ゲスト削除
+    public function destroyGuest(Request $request)
+    {
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'd_signal_id' => ['int', 'min:1', 'required'],
+            'user_id' => ['int', 'min:1', 'required'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // 対象の救難信号が存在するかチェック
+        DistressSignal::where('id', '=', $request->d_signal_id)->firstOrFail();
+
+        // 指定した救難信号に指定したゲストが存在するかチェック
+        $guest = Guest::where('user_id', '=', $request->user_id)
+            ->where('distress_signal_id', '=', $request->d_signal_id)
+            ->firstOrFail();
+
+        try {
+            // トランザクション処理
+            DB::transaction(function () use ($guest) {
+                // ゲスト削除
+                $guest->delete();
+            });
+            return response()->json();
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
     // リプレイ情報取得
     public function showReplay(Request $request)
@@ -403,7 +469,7 @@ class DistressSignalController extends Controller
         }
 
         // ユーザー存在チェック
-        User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user_id);
 
         // 自身のゲストレコードの存在チェック
         $guests = Guest::where('user_id', '=', $request->user_id)->get();
@@ -419,7 +485,7 @@ class DistressSignalController extends Controller
         $sub_query = DB::raw('(SELECT COUNT(*) AS cnt, distress_signal_id FROM guests GROUP BY distress_signal_id) AS sub_query_guests');
 
         // 救難信号ID,ホストのID,ステージID,action(0:挑戦中,1:ゲームクリア),参加ゲストの人数,報酬を取得したかどうか,救難信号レコードの生成日を取得する
-        $guest_data = Guest::selectRaw('d_signals.id AS d_signal_id, d_signals.user_id AS host_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest, guests.is_rewarded, d_signals.created_at')
+        $guest_data = Guest::selectRaw('d_signals.id AS d_signal_id, d_signals.user_id AS host_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest, guests.is_rewarded, DATEDIFF(now(),d_signals.created_at) AS elapsed_days')
             ->join('distress_signals AS d_signals', 'guests.distress_signal_id', '=', 'd_signals.id')
             ->leftjoin($sub_query, 'd_signals.id', '=', 'sub_query_guests.distress_signal_id')
             ->where('guests.user_id', '=', $request->user_id)
@@ -430,19 +496,22 @@ class DistressSignalController extends Controller
             abort(404);
         }
 
-        // データを分けて格納する
-        $response = ['reward' => [], 'challenge' => [], 'game_clear' => []];
-        foreach ($guest_data as $item) {
-            if ($item->action == 1 && $item->is_rewarded == 0) {
-                $response['reward'][] = $item;
-            } elseif ($item->action == 0) {
-                $response['challenge'][] = $item;
-            } else {
-                $response['game_clear'][] = $item;
-            }
+        // ホストのユーザー情報取得 (重複したレコードは省略されるため、collectionで取得する)
+        $idList = $guest_data->pluck('host_id')->toArray();
+        $users = collect($idList)->map(function ($item) {
+            return User::find($item);
+        });
+        for ($i = 0; $i < count($users); $i++) {
+            $guest_data[$i]['host_name'] = $users[$i]->name;
+            $guest_data[$i]['icon_id'] = $users[$i]->icon_id;
+
+            // 相互フォローかどうかの判定処理
+            $isFollow = FollowingUser::where('user_id', '=', $guest_data[$i]['host_id'])
+                ->where('following_user_id', '=', $user->id)->exists();
+            $guest_data[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
         }
 
-        return response()->json($response);
+        return response()->json($guest_data);
     }
 
     // 救難信号の報酬受け取り

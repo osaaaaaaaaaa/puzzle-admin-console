@@ -2,12 +2,12 @@
 //  救難信号用
 //********************************
 
-### 発信中の救難信号取得
+### 募集した救難信号取得
 GET http://localhost:8000/api/distress_signals/index?user_id=1
 Accept: application/json
 
 ### 救難信号をランダムに取得
-GET http://localhost:8000/api/distress_signals/show?user_id=4
+GET http://localhost:8000/api/distress_signals/show?user_id=2
 Accept: application/json
 
 ### 救難信号登録
@@ -16,9 +16,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 1,
-    "stage_id": 10,
-    "action": 0
+    "user_id": 10,
+    "stage_id": 5
 }
 
 ### 救難信号ゲームクリア
@@ -36,7 +35,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 4
+    "d_signal_id": 9
 }
 
 ### 参加ゲスト取得
@@ -50,10 +49,21 @@ Accept: application/json
 
 {
     "d_signal_id": 1,
-    "user_id": 3,
-    "position": "TEST",
-    "vector": "TEST"
+    "user_id": 20,
+    "position": "BB",
+    "vector": "BB"
 }
+
+### ゲスト削除
+POST http://localhost:8000/api/distress_signals/guest/destroy
+Content-Type: application/json
+Accept: application/json
+
+{
+    "d_signal_id": 2,
+    "user_id": 1
+}
+
 
 ### リプレイ情報取得
 GET http://localhost:8000/api/distress_signals/replay/show?d_signal_id=1&is_latest=1
@@ -71,7 +81,7 @@ Accept: application/json
 }
 
 ### ホストのときの救難信号ログ取得
-GET http://localhost:8000/api/distress_signals/host_log?user_id=2
+GET http://localhost:8000/api/distress_signals/host_log?user_id=1
 Accept: application/json
 
 ### ゲストのときの救難信号ログ取得

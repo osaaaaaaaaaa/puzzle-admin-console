@@ -74,6 +74,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('/guest/show', 'showGuest')->name('guest.show');
             // ゲスト更新(参加・配置情報更新)
             Route::post('/guest/update', 'updateGuest')->name('guest.update');
+            // ゲスト削除
+            Route::post('/guest/destroy', 'destroyGuest')->name('guest.destroy');
             // 救難信号の報酬受け取り
             Route::post('/reward/update', 'claimReward')->name('reward.update');
 
