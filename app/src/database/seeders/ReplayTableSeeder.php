@@ -11,8 +11,7 @@ class ReplayTableSeeder extends Seeder
     {
         Replay::create([
             'distress_signal_id' => 1,
-            'replay_data' => '',
-            'guest_data' => '',
+            'replay_data' => '{}',
         ]);
     }
 }

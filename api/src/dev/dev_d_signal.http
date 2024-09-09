@@ -2,6 +2,10 @@
 //  救難信号用
 //********************************
 
+### 救難信号に参加しているユーザーのプロフィール取得
+GET http://localhost:8000/api/distress_signals/user/show?d_signal_id=6&user_id=21
+Accept: application/json
+
 ### 募集した救難信号取得
 GET http://localhost:8000/api/distress_signals/index?user_id=1
 Accept: application/json
@@ -26,7 +30,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 6
+    "d_signal_id": 1
 }
 
 ### 救難信号削除
@@ -38,7 +42,7 @@ Accept: application/json
     "d_signal_id": 9
 }
 
-### 参加ゲスト取得
+### 参加ゲストの情報取得
 GET http://localhost:8000/api/distress_signals/guest/show?d_signal_id=1
 Accept: application/json
 
@@ -48,8 +52,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 1,
-    "user_id": 20,
+    "d_signal_id": 24,
+    "user_id": 1,
     "position": "BB",
     "vector": "BB"
 }
@@ -64,20 +68,18 @@ Accept: application/json
     "user_id": 1
 }
 
-
 ### リプレイ情報取得
-GET http://localhost:8000/api/distress_signals/replay/show?d_signal_id=1&is_latest=1
+GET http://localhost:8000/api/distress_signals/replay/show?d_signal_id=4
 Accept: application/json
 
-### リプレイ情報登録
-POST http://localhost:8000/api/distress_signals/replay/store
+### リプレイ情報更新
+POST http://localhost:8000/api/distress_signals/replay/update
 Content-Type: application/json
 Accept: application/json
 
 {
     "d_signal_id": 4,
-    "replay_data": "TEST33",
-    "guest_data": "TEST233"
+    "replay_data": "{(0,0,0)}"
 }
 
 ### ホストのときの救難信号ログ取得

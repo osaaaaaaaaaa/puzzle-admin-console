@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\DistressSignalUserProfileResource;
+use App\Http\Resources\GuestResource;
 use App\Http\Resources\ReplayResource;
+use App\Models\Achievement;
 use App\Models\DistressSignal;
 use App\Models\FollowingUser;
 use App\Models\Guest;
 use App\Models\Replay;
+use App\Models\StageResult;
 use App\Models\User;
 use App\Models\UserItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -18,6 +23,76 @@ class DistressSignalController extends Controller
 {
     // ゲストが参加できる人数
     const GUEST_CNT_MAX = 2;
+
+    // 救難信号に参加しているユーザーのプロフィール取得
+    public function showUser(Request $request)
+    {
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'd_signal_id' => ['int', 'min:1', 'required'],
+            'user_id' => ['int', 'min:1', 'required'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $user = User::findOrFail($request->user_id);
+
+        // 救難信号の存在チェック
+        $d_signal = DistressSignal::where('id', '=', $request->d_signal_id)->firstOrFail();
+
+        // ゲストの取得と存在チェック
+        $guests = $d_signal->guests;
+        if (count($guests) <= 0) {
+            abort(404);
+        }
+
+        // ゲストを取得する
+        $profiles = User::selectRaw('users.id AS id,name,achievement_id,icon_id,stage_id')
+            ->whereIn('id', $guests->pluck('user_id'))
+            ->where('id', '!=', $request->user_id)
+            ->get()->toArray();
+
+        // 指定したユーザーがホストではない場合
+        if ($d_signal->user_id != $request->user_id) {
+            // ホストのユーザー情報取得
+            $profile_host = DistressSignal::selectRaw('users.id AS id,name,achievement_id,icon_id,users.stage_id')
+                ->join('users', 'users.id', '=', 'distress_signals.user_id')
+                ->where('distress_signals.id', '=', $request->d_signal_id)
+                ->get()->toArray();
+
+            $profiles = array_merge($profiles, $profile_host);
+        }
+
+        // 設定しているアチーブの称号, 合計スコア, 相互フォローかどうかの情報を格納する
+        for ($i = 0; $i < count($profiles); $i++) {
+
+            // アチーブメントの称号取得処理
+            $title = '';
+            if ($profiles[$i]['achievement_id'] > 0) {
+                $achievement = Achievement::selectRaw('title')
+                    ->where('id', '=', $profiles[$i]['achievement_id'])
+                    ->first();
+                if (!empty($achievement->title)) {
+                    $title = $achievement->title;
+                }
+            }
+            $profiles[$i]['title'] = $title;
+
+            // 合計スコアを取得する
+            $profiles[$i]['score'] = StageResult::selectRaw('SUM(score) AS total_score')
+                ->where('stage_results.user_id', '=', $profiles[$i]['id'])->first();
+            $profiles[$i]['score'] = empty($profiles[$i]['score']['total_score']) ? 0 : $profiles[$i]['score']['total_score'];
+
+            // 相互フォローかどうかの判定処理
+            $isFollow = FollowingUser::where('user_id', '=', $profiles[$i]['id'])
+                ->where('following_user_id', '=', $user->id)->exists();
+            $profiles[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+        }
+
+        // 取得した救難信号レコードを元に参加ゲストの情報を取得する
+        return response()->json(DistressSignalUserProfileResource::collection($profiles));
+    }
 
     // 発信中の救難信号取得
     public function index(Request $request)
@@ -144,7 +219,7 @@ class DistressSignalController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        // 救難信号の存在チェック
+        // 救難信号の存在チェック(クリア済みの場合はエラーを返す)
         $d_signal = DistressSignal::where('id', '=', $request->d_signal_id)->where('action', '=', 0)->first();
         if (empty($d_signal)) {
             abort(400);
@@ -232,19 +307,12 @@ class DistressSignalController extends Controller
             abort(404);
         }
 
-        // 必要なデータを格納する
-        $response = [];
         for ($i = 0; $i < count($guests); $i++) {
-            $response[$i] = [
-                'id' => $guests[$i]->id,
-                'user_id' => $guests[$i]->user_id,
-                'position' => $guests[$i]->position,
-                'vector' => $guests[$i]->vector,
-            ];
+            $guests[$i]['name'] = User::where('id', '=', $guests[$i]->user_id)->pluck('name')->first();
         }
 
         // 取得した救難信号レコードを元に参加ゲストの情報を取得する
-        return response()->json($response);
+        return response()->json(GuestResource::collection($guests));
     }
 
     // ゲスト登録・配置情報更新
@@ -293,34 +361,6 @@ class DistressSignalController extends Controller
                 $guest->position = $request->position;
                 $guest->vector = $request->vector;
                 $guest->save();
-
-                /*                // 更新するゲストレコードが存在しない場合(初回登録の処理)
-                                if (empty($guest)) {
-
-                                    // 現在の参加人数が上限に達している場合はエラー
-                                    $guest_cnt = Guest::where('distress_signal_id', '=', $request->d_signal_id)->count();
-                                    if ($guest_cnt >= self::GUEST_CNT_MAX) {
-                                        abort(404);
-                                    }
-
-                                    // 登録処理
-                                    Guest::create([
-                                        'distress_signal_id' => $request->d_signal_id,
-                                        'user_id' => $request->user_id,
-                                        'position' => '',
-                                        'vector' => '',
-                                        'is_rewarded' => 0,
-                                    ]);
-                                } // 存在する場合は更新処理
-                                else {
-                                    if (!empty($request->position)) {
-                                        $guest->position = $request->position;
-                                    }
-                                    if (!empty($request->vector)) {
-                                        $guest->vector = $request->vector;
-                                    }
-                                    $guest->save();
-                                }*/
             });
             return response()->json();
         } catch (Exception $e) {
@@ -360,45 +400,30 @@ class DistressSignalController extends Controller
         }
     }
 
-
     // リプレイ情報取得
     public function showReplay(Request $request)
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
-            'is_latest' => ['boolean', 'required']   // 最新のデータだけを取得するかどうか
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        // リプレイ情報取得
-        if ($request->is_latest) {
-            // 最新のデータ一件を取得する
-            $replays = Replay::where('distress_signal_id', '=', $request->d_signal_id)
-                ->orderBy('id', 'desc')->take(1)->get();
-        } else {
-            // 全てのリプレイ情報取得
-            $replays = Replay::where('distress_signal_id', '=', $request->d_signal_id)->get();
-        }
+        // リプレイ情報取得&存在チェック
+        $replays = Replay::where('distress_signal_id', '=', $request->d_signal_id)->firstOrFail();
 
-        // リプレイ情報の存在チェック
-        if (count($replays) <= 0) {
-            abort(404);
-        }
-
-        return response()->json(ReplayResource::collection($replays));
+        return response()->json(ReplayResource::make($replays));
     }
 
-    // リプレイ情報登録
-    public function storeReplay(Request $request)
+    // リプレイ情報更新
+    public function updateReplay(Request $request)
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
-            'replay_data' => ['string', 'required'],
-            'guest_data' => ['string', 'required'],
+            'replay_data' => ['required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -410,12 +435,13 @@ class DistressSignalController extends Controller
         try {
             // トランザクション処理
             DB::transaction(function () use ($request) {
-                // 登録処理
-                Replay::create([
-                    'distress_signal_id' => $request->d_signal_id,
-                    'replay_data' => $request->replay_data,
-                    'guest_data' => $request->guest_data
-                ]);
+                // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
+                $replay = Replay::firstOrCreate(
+                    ['distress_signal_id' => $request->d_signal_id],    // 検索する条件値
+                    ['replay_data' => json_encode($request->replay_data),]   // 生成するときに代入するカラム
+                );
+                $replay->replay_data = json_encode($request->replay_data);
+                $replay->save();
             });
             return response()->json();
         } catch (Exception $e) {

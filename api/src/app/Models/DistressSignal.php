@@ -11,9 +11,6 @@ class DistressSignal extends Model
         'id',
     ];
 
-    // 最大参加人数
-    const GUEST_CNT_MAX = 3;
-
     // 参加ゲストを取得するリレーション
     public function guests()
     {

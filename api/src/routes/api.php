@@ -53,6 +53,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     Route::prefix('distress_signals')->name('distress_signals.')->controller(DistressSignalController::class)
         ->group(function () {
+            // 救難信号に参加しているユーザーのプロフィール取得
+            Route::get('/user/show', 'showUser')->name('user.show');
+
             //************************
             // ホスト関連のAPI
             //************************
@@ -85,7 +88,7 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // リプレイ情報取得
             Route::get('/replay/show', 'showReplay')->name('replay.show');
             // リプレイ情報登録
-            Route::post('/replay/store', 'storeReplay')->name('replay.store');
+            Route::post('/replay/update', 'updateReplay')->name('replay.update');
 
             //******************************************
             // 救難信号の募集[ホスト]・参加ログ[ゲスト]を取得

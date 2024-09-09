@@ -10,4 +10,5 @@ class Guest extends Model
     protected $guarded = [
         'id',
     ];
+
 }
