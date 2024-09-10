@@ -9,10 +9,12 @@ return new class extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 128); // 名前
-            $table->integer('achievement_id'); // 設定しているアチーブメントID
-            $table->integer('icon_id');        // アイコンID
-            $table->integer('stage_id');       // 最新のステージID
+            $table->string('name', 128);              // 名前
+            $table->integer('achievement_id');              // 設定しているアチーブメントID
+            $table->integer('icon_id');                     // アイコンID
+            $table->integer('stage_id');                    // ステージID
+            $table->boolean('is_distress_signal_enabled');  // 救難信号システムを解放したかどうか
+            $table->integer('add_distress_signals');        // 救難信号の募集や参加できる上限数に加算する値
             $table->timestamps();
         });
     }

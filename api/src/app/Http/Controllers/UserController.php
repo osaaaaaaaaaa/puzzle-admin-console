@@ -65,6 +65,8 @@ class UserController extends Controller
             'title' => $title,
             'stage_id' => $user->stage_id,
             'icon_id' => $user->icon_id,
+            'is_distress_signal_enabled' => $user->is_distress_signal_enabled,
+            // 'add_distress_signals' => $user->add_distress_signals,
             'score' => $total_score,
         ];
 
@@ -91,7 +93,9 @@ class UserController extends Controller
                     'name' => $request->name,
                     'achievement_id' => 0,
                     'stage_id' => 1,
-                    'icon_id' => 1
+                    'icon_id' => 1,
+                    'is_distress_signal_enabled' => 0,
+                    'add_distress_signals' => 0
                 ]);
 
                 // 初期アイテム取得

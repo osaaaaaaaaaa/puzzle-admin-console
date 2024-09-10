@@ -12,6 +12,16 @@ class User extends Model
         'id',
     ];
 
+    // 相互フォローのユーザーを取得する
+    public function agreement()
+    {
+        $follow_users = FollowingUser::where('user_id', '=', $this->id)->get();
+        return User::selectRaw('users.id AS id,name,stage_id,icon_id')
+            ->join('following_users', 'following_users.user_id', '=', 'users.id')
+            ->whereIn('user_id', $follow_users->pluck('following_user_id'))
+            ->where('following_user_id', '=', $this->id)->get();
+    }
+
     // ステージリザルトのリレーション
     public function stageresult()
     {

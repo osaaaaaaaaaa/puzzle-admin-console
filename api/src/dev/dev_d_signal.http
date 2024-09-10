@@ -11,7 +11,7 @@ GET http://localhost:8000/api/distress_signals/index?user_id=1
 Accept: application/json
 
 ### 救難信号をランダムに取得
-GET http://localhost:8000/api/distress_signals/show?user_id=2
+GET http://localhost:8000/api/distress_signals/show?user_id=1
 Accept: application/json
 
 ### 救難信号登録
@@ -21,7 +21,7 @@ Accept: application/json
 
 {
     "user_id": 10,
-    "stage_id": 5
+    "stage_id": 9
 }
 
 ### 救難信号ゲームクリア
@@ -52,10 +52,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 24,
-    "user_id": 1,
-    "position": "BB",
-    "vector": "BB"
+    "d_signal_id": 3,
+    "user_id": 5,
+    "position": "TEST",
+    "vector": "TEST"
 }
 
 ### ゲスト削除

@@ -21,8 +21,20 @@ use Exception;
 
 class DistressSignalController extends Controller
 {
+    // デフォルトで募集できる上限数
+    const DEFAULT_RECRUITMENTS = 1;
+
+    // デフォルトで参加できる上限数
+    const DEFAULT_PARTICIPANTS = 2;
+
     // ゲストが参加できる人数
-    const GUEST_CNT_MAX = 2;
+    const MAX_GUEST_CNT = 2;
+
+    // 救難信号を取得できる最大件数
+    const MAX_DISTRESS_SIGNAL = 10;
+
+    // 救難信号の履歴を残せる最大件数
+    const MAX_DISTRESS_SIGNAL_HISTORY = 10;
 
     // 救難信号に参加しているユーザーのプロフィール取得
     public function showUser(Request $request)
@@ -94,7 +106,7 @@ class DistressSignalController extends Controller
         return response()->json(DistressSignalUserProfileResource::collection($profiles));
     }
 
-    // 発信中の救難信号取得
+    // 自身が募集中の救難信号取得
     public function index(Request $request)
     {
         // バリデーション
@@ -129,43 +141,79 @@ class DistressSignalController extends Controller
         // ユーザーの存在チェック
         $user = User::findOrFail($request->user_id);
 
+
+        // 相互フォローのユーザーを取得する
+        $users = $user->agreement();
+
         // JOINで使うサブクエリを作成する
         $sub_query_guest_cnt = DB::raw('(SELECT COUNT(*) AS cnt, distress_signal_id FROM guests GROUP BY distress_signal_id) AS sq_cnt_guests');
 
-        // 自身が発信していない && ゲストとして参加していない && 未クリア && 参加ゲストの人数がMAX未満の救難信号レコードをランダムに最大10個まで取得する
-        $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
-            ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
-            ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
-            ->where([
-                ['guests.user_id', '!=', $request->user_id],             // ①ゲストとして参加していない
-                ['distress_signals.user_id', '!=', $request->user_id],   // ②自身が発信していない
-                ['distress_signals.action', '=', 0],                     // ③未クリア
-            ])
-            ->orWhere([
-                ['guests.user_id', '=', null],                           // ④上の①に当てはまるものがない場合
-                ['distress_signals.user_id', '!=', $request->user_id],   // ⑤自身が発信していない
-                ['distress_signals.action', '=', 0],                     // ⑥未クリア
-            ])
-            ->having('cnt_guest', '<', self::GUEST_CNT_MAX)
-            ->limit(10)
-            ->get();
+        // 相互フォローのユーザーが募集している救難信号（参加可能）を取得する
+        $response_d_signals = null;
+        $d_signal_cnt = 0;
+        $usersID = 0;
+        if (count($users) > 0) {
+            $response_d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
+                ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
+                ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
+                ->whereIn('distress_signals.user_id', $users->pluck('id'))
+                ->where(function ($query) use ($request) {
+                    $query->where('guests.user_id', '!=', $request->user_id)    // 自身がゲストとして参加していない
+                    ->orWhere('guests.user_id', '=', null);                     // まだゲストが存在しない
+                })
+                ->where([
+                    ['distress_signals.user_id', '!=', $request->user_id],   // 自身が発信していない
+                    ['distress_signals.action', '=', 0],                     // 未クリア
+                ])
+                ->having('cnt_guest', '<', self::MAX_GUEST_CNT)
+                ->limit(10)
+                ->get()->toArray();
 
-        // ホストのユーザー情報取得 (重複したレコードは省略されるため、collectionで取得する)
-        $idList = $d_signals->pluck('user_id')->toArray();
-        $users = collect($idList)->map(function ($item) {
-            return User::find($item);
-        });
-        for ($i = 0; $i < count($users); $i++) {
-            $d_signals[$i]['host_name'] = $users[$i]->name;
-            $d_signals[$i]['icon_id'] = $users[$i]->icon_id;
-
-            // 相互フォローかどうかの判定処理
-            $isFollow = FollowingUser::where('user_id', '=', $d_signals[$i]['user_id'])
-                ->where('following_user_id', '=', $user->id)->exists();
-            $d_signals[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+            $d_signal_cnt = count($response_d_signals);
+            $usersID = $users->pluck('id');
         }
 
-        return response()->json($d_signals);
+        if ($d_signal_cnt < self::MAX_DISTRESS_SIGNAL) {
+            // 件数が足りない場合、他の参加可能な救難信号を取得する
+            $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
+                ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
+                ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
+                ->whereNot('distress_signals.user_id', $usersID)
+                ->where(function ($query) use ($request) {
+                    $query->where('guests.user_id', '!=', $request->user_id)    // 自身がゲストとして参加していない
+                    ->orWhere('guests.user_id', '=', null);                     // まだゲストが存在しない
+                })
+                ->where([
+                    ['distress_signals.user_id', '!=', $request->user_id],   // 自身が発信していない
+                    ['distress_signals.action', '=', 0],                     // 未クリア
+                ])
+                ->having('cnt_guest', '<', self::MAX_GUEST_CNT)
+                ->limit(self::MAX_DISTRESS_SIGNAL - $d_signal_cnt)
+                ->get()->toArray();
+
+            if (!empty($response_d_signals)) {
+                $response_d_signals = array_merge($response_d_signals, $d_signals);
+            } else {
+                $response_d_signals = $d_signals;
+            }
+        }
+
+        // ホストのユーザー情報取得 (重複したレコードは省略されるため、collectionで取得する)
+        $idList = array_column($response_d_signals, 'user_id');
+        $hosts = collect($idList)->map(function ($item) {
+            return User::find($item);
+        });
+        $arrayUsers = $users->toArray();
+        for ($i = 0; $i < count($hosts); $i++) {
+            $response_d_signals[$i]['host_name'] = $hosts[$i]->name;
+            $response_d_signals[$i]['icon_id'] = $hosts[$i]->icon_id;
+
+            // 相互フォローかどうかの判定処理
+            $exist = in_array($hosts[$i]->id, array_column($arrayUsers, 'id'));
+            $response_d_signals[$i]['is_agreement'] = $exist ? 1 : 0;
+        }
+
+        return response()->json($response_d_signals);
     }
 
     // 救難信号登録
@@ -181,7 +229,21 @@ class DistressSignalController extends Controller
         }
 
         // ユーザーの存在チェック
-        User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user_id);
+
+        // 救難信号を募集した情報を取得
+        $recruitments = DistressSignal::where('user_id', '=', $request->user_id)->get()->toArray();
+
+        // 募集した数(履歴)が上限に達していないかチェック
+        if (self::MAX_DISTRESS_SIGNAL_HISTORY <= count($recruitments)) {
+            return response()->json(['error' => "募集した履歴の数が上限に達しています\n\n履歴を削除してください"], 400);
+        }
+
+        // 募集する際に、同時に救難信号を募集する数が上限に達していないかチェック
+        $current_recruitments = array_column($recruitments, 'action');
+        if (self::DEFAULT_RECRUITMENTS + $user->add_distress_signals <= count($current_recruitments)) {
+            return response()->json(['error' => "同時に募集できる数が上限に達しています"], 400);
+        }
 
         // 重複した救難信号(ゲームクリア済みは除く)が存在する場合はエラー
         $is_d_signal = DistressSignal::where('user_id', '=', $request->user_id)
@@ -189,7 +251,7 @@ class DistressSignalController extends Controller
             ->where('action', '=', 0)
             ->exists();
         if ($is_d_signal) {
-            abort(400);
+            return response()->json(['error' => "通信エラーが発生しました"], 400);
         }
 
         try {
@@ -329,19 +391,37 @@ class DistressSignalController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        // ユーザーの存在チェック
+        $user = User::findOrFail($request->user_id);
+
         // 既にゲームクリアしている場合はエラーを返す
         $d_signal = DistressSignal::findOrFail($request->d_signal_id);
         if ($d_signal->action == 1) {
-            return response()->json(['error' => "クリア済み"], 400);
+            return response()->json(['error' => "参加できませんでした"], 400);
         }
 
-        // この救難信号に参加していないユーザーは、救難信号の参加人数がMAXの場合エラーを返される
-        $exists = Guest::where('user_id', '=', $request->user_id)->where('distress_signal_id', '=',
-            $request->d_signal_id)->exists();
+        // ゲスト登録するのかどうか取得(まだレコードが存在しない場合は登録)
+        $exists = Guest::where('user_id', '=', $request->user_id)
+            ->where('distress_signal_id', '=', $request->d_signal_id)->exists();
         if (!$exists) {
+            // 参加した数(履歴)が上限に達していないかチェック
+            $participants = Guest::where('user_id', '=', $request->user_id)->get();
+            if (self::MAX_DISTRESS_SIGNAL_HISTORY <= count($participants)) {
+                return response()->json(['error' => "参加した履歴の数が上限に達しています\n\n履歴を削除してください"],
+                    400);
+            }
+
+            // 参加する際に、同時に救難信号に参加している数が上限に達していないかチェック(未クリアの救難信号に参加している数を取得する)
+            $current_recruitments = DistressSignal::whereIn('id', $participants->pluck('distress_signal_id'))
+                ->where('action', '=', 0)->count();
+            if (self::DEFAULT_PARTICIPANTS + $user->add_distress_signals <= $current_recruitments) {
+                return response()->json(['error' => "同時に参加できる数が上限に達しています"], 400);
+            }
+
+            // この救難信号に参加していないユーザーは、救難信号の参加人数がMAXの場合エラーを返される
             $guest_cnt = Guest::where('distress_signal_id', '=', $request->d_signal_id)->count();
-            if ($guest_cnt >= self::GUEST_CNT_MAX) {
-                return response()->json(['error' => "参加人数がMAX"], 400);
+            if ($guest_cnt >= self::MAX_GUEST_CNT) {
+                return response()->json(['error' => "参加できませんでした"], 400);
             }
         }
 
