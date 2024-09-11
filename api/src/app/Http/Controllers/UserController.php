@@ -94,7 +94,7 @@ class UserController extends Controller
                     'achievement_id' => 0,
                     'stage_id' => 1,
                     'icon_id' => 1,
-                    'is_distress_signal_enabled' => 0,
+                    'is_distress_signal_enabled' => 1,
                     'add_distress_signals' => 0
                 ]);
 
