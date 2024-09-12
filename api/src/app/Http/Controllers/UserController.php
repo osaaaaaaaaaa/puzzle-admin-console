@@ -48,10 +48,10 @@ class UserController extends Controller
 
         // 設定しているアチーブメントの称号を取得する
         $title = '';
-        if ($user->achievement_id > 0) {
-            $achievement = $user->achievements()->selectRaw('title')->first();
-            if (!empty($achievement->title)) {
-                $title = $achievement->title;
+        if ($user->title_id > 0) {
+            $item = $user->gettitle()->selectRaw('name')->first();
+            if (!empty($item->name)) {
+                $title = $item->name;
             }
         }
 
@@ -61,12 +61,11 @@ class UserController extends Controller
         // 返す値をまとめる
         $response = [
             'name' => $user->name,
-            'achievement_id' => $user->achievement_id,
+            'title_id' => $user->title_id,
             'title' => $title,
             'stage_id' => $user->stage_id,
             'icon_id' => $user->icon_id,
             'is_distress_signal_enabled' => $user->is_distress_signal_enabled,
-            // 'add_distress_signals' => $user->add_distress_signals,
             'score' => $total_score,
         ];
 
@@ -91,15 +90,16 @@ class UserController extends Controller
                 // 登録処理
                 $user = User::create([
                     'name' => $request->name,
-                    'achievement_id' => 0,
+                    'title_id' => 0,
                     'stage_id' => 1,
                     'icon_id' => 1,
-                    'is_distress_signal_enabled' => 1,
+                    'is_distress_signal_enabled' => 0,
                     'add_distress_signals' => 0
                 ]);
 
                 // 初期アイテム取得
-                $items = Item::where('id', '=', 1)->orWhere('id', '=', 3)->get();
+                $items = Item::whereIn('id',
+                    [1, 3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26])->get();
 
                 foreach ($items as $item) {
                     // 所持アイテムに追加
@@ -133,7 +133,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => ['int', 'min:1'],
             'name' => ['required', 'string'],
-            'achievement_id' => ['required', 'integer'],
+            'title_id' => ['required', 'integer'],
             'stage_id' => ['required', 'integer'],
             'icon_id' => ['required', 'integer'],
         ]);
@@ -143,10 +143,10 @@ class UserController extends Controller
 
         // 存在チェック
         $user = User::findOrFail($request->user_id);
-        $achievement = Achievement::where('id', '=', $request->achievement_id)->first();
-        if ($request->achievement_id != 0 && empty($achievement)) {
+        $item = Item::where('id', '=', $request->title_id)->where('type', '=', 2)->first();
+        if ($request->title_id != 0 && empty($item)) {
             // ID指定が0以外 && 存在しない場合
-            return response()->json(['error' => "アチーブメントが存在しません"], 400);
+            return response()->json(['error' => "称号が存在しません"], 400);
         }
 
         // NGワードチェック
@@ -163,7 +163,7 @@ class UserController extends Controller
             // トランザクション処理
             DB::transaction(function () use ($request, $user) {
                 $user->name = $request->name;
-                $user->achievement_id = $request->achievement_id;
+                $user->title_id = $request->title_id;
                 $user->stage_id = $request->stage_id > $user->stage_id ? $request->stage_id : $user->stage_id;  // 値が高い方に更新する
                 $user->icon_id = $request->icon_id;
                 $user->save();
@@ -300,12 +300,12 @@ class UserController extends Controller
 
             // アチーブメントの称号取得処理
             $title = '';
-            if ($following_users[$i]->achievement_id > 0) {
-                $achievement = Achievement::selectRaw('title')
-                    ->where('id', '=', $following_users[$i]->achievement_id)
+            if ($following_users[$i]->title_id > 0) {
+                $item = Item::selectRaw('name')
+                    ->where('id', '=', $following_users[$i]->title_id)
                     ->first();
-                if (!empty($achievement->title)) {
-                    $title = $achievement->title;
+                if (!empty($item->name)) {
+                    $title = $item->name;
                 }
             }
             $following_users[$i]['title'] = $title;
@@ -379,12 +379,12 @@ class UserController extends Controller
 
             // アチーブメントの称号取得処理
             $title = '';
-            if ($users[$i]['achievement_id'] > 0) {
-                $achievement = Achievement::selectRaw('title')
-                    ->where('id', '=', $users[$i]['achievement_id'])
+            if ($users[$i]['title_id'] > 0) {
+                $item = Item::selectRaw('name')
+                    ->where('id', '=', $users[$i]['title_id'])
                     ->first();
-                if (!empty($achievement->title)) {
-                    $title = $achievement->title;
+                if (!empty($item->name)) {
+                    $title = $item->name;
                 }
             }
             $users[$i]['title'] = $title;
@@ -671,9 +671,9 @@ class UserController extends Controller
         $user = User::findOrFail($request->user_id);
 
         // ランキング上位の情報を取得する
-        $results = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
+        $results = StageResult::selectRaw("users.id AS user_id,users.name AS name,IFNULL(items.name,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
             ->join('users', 'users.id', '=', 'stage_results.user_id')
-            ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
+            ->leftJoin('items', 'items.id', '=', 'users.title_id')
             ->groupBy("stage_results.user_id")
             ->orderBy('score', 'desc')
             ->limit(100)
@@ -700,9 +700,9 @@ class UserController extends Controller
         $userFrag = StageResult::where('user_id', '=', $request->user_id)->exists();
 
         if ($userFrag) {
-            $userResult = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
+            $userResult = StageResult::selectRaw("users.id AS user_id,users.name AS name,IFNULL(items.name,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
                 ->join('users', 'users.id', '=', 'stage_results.user_id')
-                ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
+                ->leftJoin('items', 'items.id', '=', 'users.title_id')
                 ->where('users.id', '=', $request->user_id)
                 ->groupBy('stage_results.user_id')
                 ->first()
@@ -710,10 +710,10 @@ class UserController extends Controller
             $userResult['is_agreement'] = 0;
         }
         // フォロー内でランキング上位の情報を取得する
-        $results = StageResult::selectRaw("users.id AS user_id,name,IFNULL(title,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
+        $results = StageResult::selectRaw("users.id AS user_id,users.name AS name,IFNULL(items.name,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
             ->join('users', 'users.id', '=', 'stage_results.user_id')
             ->join('following_users AS fu', 'users.id', '=', 'fu.following_user_id')
-            ->leftJoin('achievements', 'achievements.id', '=', 'users.achievement_id')
+            ->leftJoin('items', 'items.id', '=', 'users.title_id')
             ->where('fu.user_id', '=', $request->user_id)
             ->groupBy("stage_results.user_id")
             ->orderBy('score', 'desc')

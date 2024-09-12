@@ -9,6 +9,7 @@ use App\Models\Achievement;
 use App\Models\DistressSignal;
 use App\Models\FollowingUser;
 use App\Models\Guest;
+use App\Models\Item;
 use App\Models\Replay;
 use App\Models\StageResult;
 use App\Models\User;
@@ -60,7 +61,7 @@ class DistressSignalController extends Controller
         }
 
         // ゲストを取得する
-        $profiles = User::selectRaw('users.id AS id,name,achievement_id,icon_id,stage_id')
+        $profiles = User::selectRaw('users.id AS id,name,title_id,icon_id,stage_id')
             ->whereIn('id', $guests->pluck('user_id'))
             ->where('id', '!=', $request->user_id)
             ->get()->toArray();
@@ -68,7 +69,7 @@ class DistressSignalController extends Controller
         // 指定したユーザーがホストではない場合
         if ($d_signal->user_id != $request->user_id) {
             // ホストのユーザー情報取得
-            $profile_host = DistressSignal::selectRaw('users.id AS id,name,achievement_id,icon_id,users.stage_id')
+            $profile_host = DistressSignal::selectRaw('users.id AS id,name,title_id,icon_id,users.stage_id')
                 ->join('users', 'users.id', '=', 'distress_signals.user_id')
                 ->where('distress_signals.id', '=', $request->d_signal_id)
                 ->get()->toArray();
@@ -81,12 +82,12 @@ class DistressSignalController extends Controller
 
             // アチーブメントの称号取得処理
             $title = '';
-            if ($profiles[$i]['achievement_id'] > 0) {
-                $achievement = Achievement::selectRaw('title')
-                    ->where('id', '=', $profiles[$i]['achievement_id'])
+            if ($profiles[$i]['title_id'] > 0) {
+                $item = Item::selectRaw('name')
+                    ->where('id', '=', $profiles[$i]['title_id'])
                     ->first();
-                if (!empty($achievement->title)) {
-                    $title = $achievement->title;
+                if (!empty($item->name)) {
+                    $title = $item->name;
                 }
             }
             $profiles[$i]['title'] = $title;

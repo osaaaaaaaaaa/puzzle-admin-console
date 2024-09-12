@@ -5,22 +5,44 @@ namespace Database\Seeders;
 use App\Models\Item;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ItemTableSeeder extends Seeder
 {
-    const ICON_CNT_MAX = 7;
+    const ICON_CNT_MAX = 9;
+
+    /*[アイテムタイプ]
+    1:アイコン,
+    2:称号,
+    3:お助けアイテム,
+    4:救難信号解放,
+    5:救難信号の上限値UP,*/
 
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        for ($i = 0; $i <= self::ICON_CNT_MAX; $i++) {
+        // テキストファイルのパス
+        $filePath = 'txt/Item.txt';
+
+        // Storageファザードを使って読み込む
+        $content = Storage::get($filePath);
+
+        // 区切り文字で分割する(改行指定)
+        $lines = explode(PHP_EOL, $content);
+        array_splice($lines, 0, 1); // 1行目は削除
+
+        foreach ($lines as $line) {
+            // 改行と空白を削除
+            str_replace([PHP_EOL, " "], "", $line);
+            $values = explode(",", $line);
+
             Item::create([
-                'name' => 'ユーザーアイコン' . $i + 1,
-                'type' => 1,
-                'effect' => $i + 1,
-                'description' => 'ユーザーのアイコンデザイン'
+                'name' => $values[0],
+                'type' => (int)$values[1],
+                'effect' => (int)$values[2],
+                'description' => $values[3]
             ]);
         }
     }

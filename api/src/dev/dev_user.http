@@ -7,7 +7,7 @@ GET http://localhost:8000/api/users/show?user_id=10
 Accept: application/json
 
 ### 所持アイテムリスト取得
-GET http://localhost:8000/api/users/item/show?user_id=1&type=1
+GET http://localhost:8000/api/users/item/show?user_id=1&type=2
 Accept: application/json
 
 ### フォローリスト取得
@@ -15,7 +15,7 @@ GET http://localhost:8000/api/users/follow/show?user_id=1
 Accept: application/json
 
 ### おすすめのユーザーリスト取得
-GET http://localhost:8000/api/users/recommended/show?user_id=51
+GET http://localhost:8000/api/users/recommended/show?user_id=21
 Accept: application/json
 
 ### 受信メールリスト取得
@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/ranking/show?user_id=1
 Accept: application/json
 
 ### フォロー内でランキング取得
-GET http://localhost:8000/api/users/follow/ranking/show?user_id=21
+GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
 ### ステージリザルト取得
@@ -65,9 +65,9 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 10,
+    "user_id": 21,
     "name": "test",
-    "achievement_id": 0,
+    "title_id": 12,
     "stage_id": 1,
     "icon_id": 1
 }

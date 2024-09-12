@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name', 128);              // 名前
-            $table->integer('achievement_id');              // 設定しているアチーブメントID
+            $table->integer('title_id');                    // 設定している称号ID
             $table->integer('icon_id');                     // アイコンID
             $table->integer('stage_id');                    // ステージID
             $table->boolean('is_distress_signal_enabled');  // 救難信号システムを解放したかどうか

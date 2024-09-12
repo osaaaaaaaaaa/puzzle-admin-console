@@ -3,7 +3,7 @@
 //********************************
 
 ### 救難信号に参加しているユーザーのプロフィール取得
-GET http://localhost:8000/api/distress_signals/user/show?d_signal_id=6&user_id=21
+GET http://localhost:8000/api/distress_signals/user/show?d_signal_id=1&user_id=1
 Accept: application/json
 
 ### 募集した救難信号取得

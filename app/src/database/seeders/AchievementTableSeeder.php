@@ -10,7 +10,6 @@ class AchievementTableSeeder extends Seeder
     public function run(): void
     {
         Achievement::create([
-            'title' => '',
             'text' => 'レベルを10に上げる',
             'type' => 2,
             'achieved_val' => 10,
@@ -18,7 +17,6 @@ class AchievementTableSeeder extends Seeder
             'item_amount' => 3
         ]);
         Achievement::create([
-            'title' => '',
             'text' => 'ステージ1をクリアする',
             'type' => 3,
             'achieved_val' => 1,
@@ -26,7 +24,6 @@ class AchievementTableSeeder extends Seeder
             'item_amount' => 2
         ]);
         Achievement::create([
-            'title' => '',
             'text' => '他のユーザーの救難信号に参加する',
             'type' => 4,
             'achieved_val' => 1,
@@ -34,7 +31,6 @@ class AchievementTableSeeder extends Seeder
             'item_amount' => 1
         ]);
         Achievement::create([
-            'title' => 'まだビギナー',
             'text' => 'アチーブメントを３つ獲得する',
             'type' => 1,
             'achieved_val' => 3,

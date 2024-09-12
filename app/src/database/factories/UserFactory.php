@@ -22,7 +22,7 @@ class UserFactory extends Factory
         $scheduled_data = $this->faker->dateTimeBetween('+1day', '+1year'); // 日付をランダム生成
         return [
             'name' => $this->faker->unique()->name(),
-            'achievement_id' => $this->faker->numberBetween(0, 5),
+            'title_id' => $this->faker->numberBetween(10, 20),
             'icon_id' => $this->faker->numberBetween(1, 7),
             'stage_id' => $this->faker->numberBetween(1, 23),
             'is_distress_signal_enabled' => 1,

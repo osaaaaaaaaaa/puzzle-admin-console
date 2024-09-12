@@ -17,7 +17,7 @@ class NGWordTableSeeder extends Seeder
         // Storageファザードを使って読み込む
         $content = Storage::get($filePath);
 
-        // 区切り文字で分割する
+        // 区切り文字で分割する(改行指定)
         $lines = explode(PHP_EOL, $content);
 
         foreach ($lines as $line) {

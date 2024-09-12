@@ -35,10 +35,10 @@ class User extends Model
             ->selectRaw('SUM(score) AS total_score')->groupBy('user_id');
     }
 
-    // アチーブメントの称号を取得するリレーション
-    public function achievements()
+    // 称号を取得するリレーション
+    public function gettitle()
     {
-        return $this->hasMany(Achievement::class, 'id', 'achievement_id');
+        return $this->hasMany(Item::class, 'id', 'title_id');
     }
 
     // 所持アイテムのリレーション
