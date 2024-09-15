@@ -3,7 +3,7 @@
 //********************************
 
 ### アチーブメントマスタと達成状況取得
-GET http://localhost:8000/api/achievements?user_id=2
+GET http://localhost:8000/api/achievements?user_id=21
 Accept: application/json
 
 ### アチーブメント達成状況更新
@@ -12,7 +12,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 2,
+    "user_id": 21,
     "type": 1,
-    "allie_val": 3
+    "allie_val": 10
 }

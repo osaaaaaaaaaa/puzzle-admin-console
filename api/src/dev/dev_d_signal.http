@@ -20,8 +20,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 10,
-    "stage_id": 9
+    "user_id": 21,
+    "stage_id": 2
 }
 
 ### 救難信号ゲームクリア
@@ -39,7 +39,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 9
+    "d_signal_id": 4
 }
 
 ### 参加ゲストの情報取得
@@ -52,8 +52,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 3,
-    "user_id": 5,
+    "d_signal_id": 4,
+    "user_id": 21,
     "position": "TEST",
     "vector": "TEST"
 }
@@ -96,8 +96,6 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 10,
-    "user_id": 7,
-    "item_id": 1,
-    "item_amount": 10
+    "d_signal_id": 2,
+    "user_id": 1
 }

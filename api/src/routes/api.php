@@ -33,9 +33,10 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('/item/show', 'showItem')->name('item.show');
             Route::post('/item/update', 'updateItem')->name('item.update');
 
-            // メールリスト取得・開封
+            // メールリスト取得・開封・削除
             Route::get('/mail/show', 'showMail')->name('mail.show');
             Route::post('/mail/update', 'updateMail')->name('mail.update');
+            Route::post('/mail/destroy', 'destroyMail')->name('mail.destroy');
 
             // ステージリザルト取得・更新
             Route::get('/stage/result/show', 'showStageResult')->name('stage.result.show');
@@ -48,6 +49,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     // アチーブメントの達成状況更新
     Route::post('users/achievements/update', [AchievementController::class, 'update'])->name('achievements.update');
+    // アチーブメント報酬受け取り処理
+    Route::post('users/achievements/reward/update',
+        [AchievementController::class, 'updateReward'])->name('achievements.reward.update');
 
     // [ 救難信号 ] #####################################################################################################
 

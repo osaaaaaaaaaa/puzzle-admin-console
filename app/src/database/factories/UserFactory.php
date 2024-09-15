@@ -25,8 +25,6 @@ class UserFactory extends Factory
             'title_id' => $this->faker->numberBetween(10, 20),
             'icon_id' => $this->faker->numberBetween(1, 7),
             'stage_id' => $this->faker->numberBetween(1, 23),
-            'is_distress_signal_enabled' => 1,
-            'add_distress_signals' => $this->faker->numberBetween(0, 3),
             'created_at' => $scheduled_data->format('Y-m-d H:i:s'),
             'updated_at' => $scheduled_data->modify('+1 hour')->format('Y-m-d H:i:s')
         ];

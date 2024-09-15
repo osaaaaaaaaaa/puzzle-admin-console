@@ -10,8 +10,8 @@ class AttachedItemTableSeeder extends Seeder
     public function run(): void
     {
         Attached_Item::create([
-                'item_id' => 1,
-                'amount' => 10,
+                'item_id' => 37,
+                'amount' => 5,
                 'mail_id' => 1
             ]
         );

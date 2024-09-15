@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('mails', function (Blueprint $table) {
             $table->id();
+            $table->string('title', 32);
             $table->string('text', 255);
             $table->timestamps();
         });

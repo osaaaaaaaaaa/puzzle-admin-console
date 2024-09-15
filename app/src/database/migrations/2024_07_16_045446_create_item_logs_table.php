@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');         // ユーザーID
             $table->integer('item_id');         // アイテムID
-            $table->integer('option_id');       // 入手した方法
+            $table->integer('option_id');       // 入手した方法[1:アチーブメント]
             $table->integer('allie_count');     // 増減数
             $table->timestamps();
 

@@ -25,14 +25,6 @@ class AuthController extends Controller
     // ログイン処理
     public function doLogin(Request $request)
     {
-//        route('login');
-
-//        // バリデーションチェック
-//        $validated = $request->validate([
-//            'name' => ['required', 'min:4', 'max:20'],
-//            'password' => ['required'],
-//        ]); // エラー発生で自動で元のページへ戻る
-
         // カスタムバリデーション
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'min:4'],

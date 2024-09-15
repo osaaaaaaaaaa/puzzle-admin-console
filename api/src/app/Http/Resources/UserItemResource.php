@@ -13,6 +13,7 @@ class UserItemResource extends JsonResource
             'item_id' => $this->pivot->item_id,
             'name' => $this->name,
             'effect' => $this->effect,
+            'description' => $this->description,
             'amount' => $this->pivot->amount
         ];
     }

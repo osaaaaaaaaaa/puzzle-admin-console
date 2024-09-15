@@ -28,6 +28,12 @@ class User extends Model
         return $this->hasMany(Stageresult::class, 'user_id', 'id');
     }
 
+    // 合計ポイントを取得するリレーション
+    public function totalpoint()
+    {
+        return $this->hasMany(UserItem::class, 'user_id', 'id');
+    }
+
     // 合計スコアを取得するリレーション
     public function totalscore()
     {
@@ -54,7 +60,11 @@ class User extends Model
     // 受信メールのリレーション
     public function mails()
     {
-        return $this->hasMany(UserMail::class);
+        // 中間テーブルに関する複数行を取得
+        return $this->belongsToMany(
+        // 第二モデル , 第三テーブル , 第一モデルと関係のあるカラム , 第二モデルと関係のあるカラム
+            Mail::class, 'user_mails', 'user_id', 'mail_id')
+            ->withPivot('is_received');
     }
 
     // フォローのリレーション

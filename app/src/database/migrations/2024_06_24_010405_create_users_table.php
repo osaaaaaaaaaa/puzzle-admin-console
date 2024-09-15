@@ -13,8 +13,6 @@ return new class extends Migration {
             $table->integer('title_id');                    // 設定している称号ID
             $table->integer('icon_id');                     // アイコンID
             $table->integer('stage_id');                    // ステージID
-            $table->boolean('is_distress_signal_enabled');  // 救難信号システムを解放したかどうか
-            $table->integer('add_distress_signals');        // 救難信号の募集や参加できる上限数に加算する値
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\StageResultResource;
+use App\Http\Resources\UpdateUserMailResource;
 use App\Http\Resources\UserFollowResource;
 use App\Http\Resources\UserItemResource;
 use App\Http\Resources\UserMailResource;
@@ -15,6 +16,7 @@ use App\Models\FollowLogs;
 use App\Models\Item;
 use App\Models\ItemLogs;
 use App\Models\Level;
+use App\Models\Mail;
 use App\Models\MailLogs;
 use App\Models\NGWord;
 use App\Models\StageResult;
@@ -31,6 +33,9 @@ class UserController extends Controller
 {
     const FOLLOW_LIMIT_MAX = 30;
     const STAGE_LIMIT_MAX = 22;
+
+    // 救難信号システムを解放するアイテムID
+    const ITEM_DISTRESS_SIGNAL_ENABLED_ID = 35;
 
     // ユーザー情報取得
     public function show(Request $request)
@@ -58,6 +63,10 @@ class UserController extends Controller
         // 合計スコアを取得する
         $total_score = $user->totalscore()->first() == null ? 0 : $user->totalscore()->pluck('total_score')->first();
 
+        // 救難信号システムを開放しているかどうか取得
+        $is_distress_signal_enable = UserItem::where('user_id', '=', $request->user_id)
+            ->where('item_id', '=', self::ITEM_DISTRESS_SIGNAL_ENABLED_ID)->exists();
+
         // 返す値をまとめる
         $response = [
             'name' => $user->name,
@@ -65,7 +74,7 @@ class UserController extends Controller
             'title' => $title,
             'stage_id' => $user->stage_id,
             'icon_id' => $user->icon_id,
-            'is_distress_signal_enabled' => $user->is_distress_signal_enabled,
+            'is_distress_signal_enabled' => $is_distress_signal_enable,
             'score' => $total_score,
         ];
 
@@ -93,13 +102,14 @@ class UserController extends Controller
                     'title_id' => 0,
                     'stage_id' => 1,
                     'icon_id' => 1,
-                    'is_distress_signal_enabled' => 0,
-                    'add_distress_signals' => 0
                 ]);
 
                 // 初期アイテム取得
-                $items = Item::whereIn('id',
-                    [1, 3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26])->get();
+                $items = Item::whereIn('id', [1, 3])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('id', '>=', 10)
+                            ->where('id', '<=', 28);
+                    })->get();
 
                 foreach ($items as $item) {
                     // 所持アイテムに追加
@@ -216,57 +226,24 @@ class UserController extends Controller
         // 指定したユーザーが存在するかどうか
         User::findOrFail($request->user_id);
 
-        // レコード存在チェック
-        $userItem = UserItem::where('user_id', '=', $request->user_id)->where("item_id", "=",
-            $request->item_id)->first();
-
-        //----------------------------------
-        // 登録処理(所持していないアイテムの入手)
-        //----------------------------------
-        // レコードが存在しなかった&&加減する値が0以上の場合[登録可能]
-        if (empty($userItem) && $request->allie_amount > 0) {
-            try {
-                // トランザクション処理
-                DB::transaction(function () use ($request) {
-                    // 登録処理
-                    UserItem::create([
-                        'user_id' => $request->user_id,
-                        'item_id' => $request->item_id,
-                        'amount' => $request->allie_amount,
-                    ]);
-
-                    // ログテーブル登録処理
-                    ItemLogs::create([
-                        'user_id' => $request->user_id,
-                        'item_id' => $request->item_id,
-                        'option_id' => $request->option_id,
-                        'allie_count' => $request->allie_amount
-                    ]);
-                });
-                return response()->json();
-            } catch (Exception $e) {
-                return response()->json(['error' => $e->getMessage()], 500);
-            }
-        } // レコードが存在しなかった&&加減する値が0以下の場合[登録不可]
-        elseif (empty($userItem) && $request->allie_amount <= 0) {
-            abort(404);
-        }
-
-        //-------------------
-        // 更新処理(レコードが存在する場合)
-        //-------------------
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request, $userItem) {
+            DB::transaction(function () use ($request) {
+
+                // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
+                $user_item = UserItem::firstOrCreate(
+                    ['user_id' => $request->user_id, 'item_id' => $request->item_id],
+                    // 検索する条件値
+                    ['amount' => 0]   // 生成するときに代入するカラム
+                );
+
                 // 加減算
-                $userItem->amount += $request->allie_amount;
-
+                $user_item->amount += $request->allie_amount;
                 // 個数が0未満になる場合
-                if ($userItem->amount < 0) {
-                    abort(400);
+                if ($user_item->amount < 0) {
+                    return response()->json(['error' => '所持数が0以下です'], 400);
                 }
-
-                $userItem->save();
+                $user_item->save();
 
                 // ログテーブル登録処理
                 ItemLogs::create([
@@ -493,22 +470,22 @@ class UserController extends Controller
     public function showMail(Request $request)
     {
         $user = User::findOrFail($request->user_id);
-        $mails = $user->mails;
-
-        foreach ($mails as $mail) {
-            $frag = MailLogs::where('user_id', '=', $request->user_id)->where("mail_id", "=", $mail->mail_id)->exists();
+        $user_mails = $user->mails;
+        foreach ($user_mails as $mail) {
+            $frag = MailLogs::where('user_id', '=', $request->user_id)
+                ->where("mail_id", "=", $mail->pivot->mail_id)->exists();
             // ログに未登録の受信メールの場合
             if (!$frag) {
                 // ログテーブル登録処理
                 MailLogs::create([
                     'user_id' => $request->user_id,
-                    'mail_id' => $mail->mail_id,
+                    'mail_id' => $mail->pivot->mail_id,
                     'action' => 0
                 ]);
             }
         }
 
-        return response()->json(UserMailResource::collection($mails));
+        return response()->json(UserMailResource::collection($user_mails));
     }
 
     // 受信メール開封
@@ -540,30 +517,21 @@ class UserController extends Controller
         //------------------------
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request, $userMail) {
+            $item_id = DB::transaction(function () use ($request, $userMail) {
 
                 // メールの添付アイテムを取得
                 $attachedItems = Attached_Item::where('mail_id', '=', $request->mail_id)->get();
-                if (!empty($attachedItems)) {
-                    foreach ($attachedItems as $item) {
+                foreach ($attachedItems as $item) {
 
-                        // 今回受け取るアイテムに関するレコードが、所持アイテムテーブルに存在するかチェック
-                        $userItem = UserItem::where('user_id', '=', $request->user_id)->where('item_id', '=',
-                            $item->item_id)->get()->first();
+                    // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
+                    $userItem = UserItem::firstOrCreate(
+                        ['user_id' => $request->user_id, 'item_id' => $item->item_id],
+                        // 検索する条件値
+                        ['amount' => 0]   // 生成するときに代入するカラム
+                    );
 
-                        // アイテムを所持していない場合は登録する
-                        if (empty($userItem)) {
-                            UserItem::create([
-                                'user_id' => $request->user_id,
-                                'item_id' => $item->item_id,
-                                'amount' => $item->amount,
-                            ]);
-                        } // 所持アイテムを更新する
-                        else {
-                            $userItem->amount += $item->amount;
-                            $userItem->save();
-                        }
-                    }
+                    $userItem->amount = ($userItem->amount + $item->amount) >= 0 ? ($userItem->amount + $item->amount) : 0;
+                    $userItem->save();
                 }
 
                 // 受信メールを開封済みにする
@@ -577,6 +545,50 @@ class UserController extends Controller
                     'action' => 1
                 ]);
 
+                return $attachedItems;
+            });
+
+            if (empty($item_id)) {
+                return response()->json();
+            } else {
+                $items = Item::whereIn('id', $item_id->pluck('item_id'))->get()->toArray();
+                for ($i = 0; $i < count($items); $i++) {
+                    $items[$i] += ['amount' => $item_id[$i]->amount];
+                }
+                return response()->json(UpdateUserMailResource::collection($items));
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // 受信メール削除
+    public function destroyMail(Request $request)
+    {
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'user_id' => ['required', 'int'],
+            'mail_id' => ['required', 'int'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // 対象のユーザーが存在するかどうか
+        User::findOrFail($request->user_id);
+
+        try {
+            // トランザクション処理
+            DB::transaction(function () use ($request) {
+                // 削除処理
+                UserMail::where('user_id', '=', $request->user_id)->where('mail_id', '=', $request->mail_id)->delete();
+
+                // ログテーブル登録処理
+                MailLogs::create([
+                    'user_id' => $request->user_id,
+                    'mail_id' => $request->mail_id,
+                    'action' => 0
+                ]);
             });
             return response()->json();
         } catch (Exception $e) {

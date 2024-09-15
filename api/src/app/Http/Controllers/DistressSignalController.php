@@ -14,14 +14,20 @@ use App\Models\Replay;
 use App\Models\StageResult;
 use App\Models\User;
 use App\Models\UserItem;
+use App\Models\UserMail;
+use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use function Laravel\Prompts\select;
 
 class DistressSignalController extends Controller
 {
+    // 救難信号の上限数を加算するアイテムID
+    const ITEM_ADD_DISTRESS_SIGNALS_ID = 36;
+
     // デフォルトで募集できる上限数
     const DEFAULT_RECRUITMENTS = 1;
 
@@ -36,6 +42,13 @@ class DistressSignalController extends Controller
 
     // 救難信号の履歴を残せる最大件数
     const MAX_DISTRESS_SIGNAL_HISTORY = 10;
+
+    // ゲストのクリア報酬
+    const ITEM_GUEST_REWARD_ID = 37;
+    const GUEST_REWARD_AMOUNT = 5;
+
+    // 救難信号の報酬を受け取れるメールID
+    const GUEST_REWARD_MAIL_ID = 1;
 
     // 救難信号に参加しているユーザーのプロフィール取得
     public function showUser(Request $request)
@@ -242,7 +255,11 @@ class DistressSignalController extends Controller
 
         // 募集する際に、同時に救難信号を募集する数が上限に達していないかチェック
         $current_recruitments = array_column($recruitments, 'action');
-        if (self::DEFAULT_RECRUITMENTS + $user->add_distress_signals <= count($current_recruitments)) {
+        $add_distress_signals = UserItem::where('user_id', '=', $request->user_id)
+            ->where('item_id', '=', self::ITEM_ADD_DISTRESS_SIGNALS_ID)
+            ->pluck('amount')->first();
+        $add_distress_signals = empty($add_distress_signals) ? 0 : $add_distress_signals;   // 上限の拡張値を取得
+        if (self::DEFAULT_RECRUITMENTS + $add_distress_signals <= count($current_recruitments)) {
             return response()->json(['error' => "同時に募集できる数が上限に達しています"], 400);
         }
 
@@ -322,10 +339,21 @@ class DistressSignalController extends Controller
             // トランザクション処理
             DB::transaction(function () use ($request, $d_signal) {
 
-                // 救難信号と関連するゲストの削除処理
+                // 救難信号と関連するゲストを取得する
                 $guests = Guest::where('distress_signal_id', '=', $d_signal->id)->get();
                 if (!empty($guests)) {
                     foreach ($guests as $guest) {
+
+                        if ($d_signal->action && !$guest->is_rewarded) {
+                            // 救難信号のステージがクリア済 && ゲストがまだ報酬を受け取っていない場合はメールを送信する
+                            UserMail::create([
+                                'user_id' => $guest->user_id,
+                                'mail_id' => self::GUEST_REWARD_MAIL_ID,
+                                'is_received' => 0
+                            ]);
+                        }
+
+                        // ゲスト削除処理
                         $guest->delete();
                     }
                 }
@@ -415,7 +443,11 @@ class DistressSignalController extends Controller
             // 参加する際に、同時に救難信号に参加している数が上限に達していないかチェック(未クリアの救難信号に参加している数を取得する)
             $current_recruitments = DistressSignal::whereIn('id', $participants->pluck('distress_signal_id'))
                 ->where('action', '=', 0)->count();
-            if (self::DEFAULT_PARTICIPANTS + $user->add_distress_signals <= $current_recruitments) {
+            $add_distress_signals = UserItem::where('user_id', '=', $request->user_id)
+                ->where('item_id', '=', self::ITEM_ADD_DISTRESS_SIGNALS_ID)
+                ->pluck('amount')->first();
+            $add_distress_signals = empty($add_distress_signals) ? 0 : $add_distress_signals;   // 上限の拡張値を取得
+            if (self::DEFAULT_PARTICIPANTS + $add_distress_signals <= $current_recruitments) {
                 return response()->json(['error' => "同時に参加できる数が上限に達しています"], 400);
             }
 
@@ -628,8 +660,6 @@ class DistressSignalController extends Controller
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
             'user_id' => ['int', 'min:1', 'required'],
-            'item_id' => ['int', 'min:1', 'required'],
-            'item_amount' => ['int', 'min:1', 'required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -649,30 +679,34 @@ class DistressSignalController extends Controller
 
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request, $guest) {
+            $userItem = DB::transaction(function () use ($request, $guest) {
 
-                // 今回受け取るアイテムに関するレコードが、所持アイテムテーブルに存在するかチェック
-                $userItem = UserItem::where('user_id', '=', $request->user_id)
-                    ->where('item_id', '=', $request->item_id)->get()->first();
+                // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
+                $userItem = UserItem::firstOrCreate(
+                    ['user_id' => $request->user_id, 'item_id' => self::ITEM_GUEST_REWARD_ID],
+                    // 検索する条件値
+                    ['amount' => 0]   // 生成するときに代入するカラム
+                );
 
-                // アイテムを所持していない場合は登録する
-                if (empty($userItem)) {
-                    UserItem::create([
-                        'user_id' => $request->user_id,
-                        'item_id' => $request->item_id,
-                        'amount' => $request->item_amount,
-                    ]);
-                } // 所持アイテムを更新する
-                else {
-                    $userItem->amount += $request->item_amount;
-                    $userItem->save();
-                }
+                $userItem->amount += self::GUEST_REWARD_AMOUNT;
+                $userItem->save();
 
                 // 報酬を受け取ったことにする
                 $guest->is_rewarded = 1;
                 $guest->save();
+
+                return $userItem;
             });
-            return response()->json();
+            $item = Item::where('id', '=', self::ITEM_GUEST_REWARD_ID)->firstOrFail();
+            $responseItem = [
+                'item_id' => $item->id,
+                'name' => $item->name,
+                'type' => $item->type,
+                'effect' => $item->effect,
+                'description' => $item->description,
+                'amount' => self::GUEST_REWARD_AMOUNT,
+            ];
+            return response()->json($responseItem);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
