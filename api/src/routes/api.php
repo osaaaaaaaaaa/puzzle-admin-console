@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\ConstantController;
 use App\Http\Controllers\DistressSignalController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\NoCacheMiddleware;
+use App\Models\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -115,4 +117,6 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     Route::get('item', [ItemController::class, 'index'])->name('items.index');
     // アチーブメント取得
     Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
+    // 定数マスタ取得
+    Route::get('constant', [ConstantController::class, 'show'])->name('constant.index');
 });

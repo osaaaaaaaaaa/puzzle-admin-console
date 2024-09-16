@@ -246,7 +246,7 @@ class DistressSignalController extends Controller
         $user = User::findOrFail($request->user_id);
 
         // 救難信号を募集した情報を取得
-        $recruitments = DistressSignal::where('user_id', '=', $request->user_id)->get()->toArray();
+        $recruitments = DistressSignal::where('user_id', '=', $request->user_id)->get();
 
         // 募集した数(履歴)が上限に達していないかチェック
         if (self::MAX_DISTRESS_SIGNAL_HISTORY <= count($recruitments)) {
@@ -254,12 +254,12 @@ class DistressSignalController extends Controller
         }
 
         // 募集する際に、同時に救難信号を募集する数が上限に達していないかチェック
-        $current_recruitments = array_column($recruitments, 'action');
+        $current_recruitments = $recruitments->where('action', '=', 0)->count();
         $add_distress_signals = UserItem::where('user_id', '=', $request->user_id)
             ->where('item_id', '=', self::ITEM_ADD_DISTRESS_SIGNALS_ID)
             ->pluck('amount')->first();
         $add_distress_signals = empty($add_distress_signals) ? 0 : $add_distress_signals;   // 上限の拡張値を取得
-        if (self::DEFAULT_RECRUITMENTS + $add_distress_signals <= count($current_recruitments)) {
+        if (self::DEFAULT_RECRUITMENTS + $add_distress_signals <= $current_recruitments) {
             return response()->json(['error' => "同時に募集できる数が上限に達しています"], 400);
         }
 

@@ -31,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ReplayTableSeeder::class);
         $this->call(StageResultTableSeeder::class);
         $this->call(NGWordTableSeeder::class);
+        $this->call(ConstantTableSeeder::class);
     }
 }

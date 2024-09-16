@@ -10,11 +10,12 @@ class UserMailResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'mail_id' => $this->pivot->mail_id,
+            'mail_id' => $this->mail_id,
             'title' => $this->title,
             'text' => $this->text,
-            'is_received' => $this->pivot->is_received,
-            'created_at' => $this->created_at->format('Y-m-d')
+            'is_received' => $this->is_received,
+            'created_at' => $this->created_at->format('Y-m-d'),
+            'elapsed_days' => $this->elapsed_days
         ];
     }
 }

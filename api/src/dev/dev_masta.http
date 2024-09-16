@@ -1,0 +1,4 @@
+
+### 定数取得
+GET http://localhost:8000/api/constant?type=1
+Accept: application/json

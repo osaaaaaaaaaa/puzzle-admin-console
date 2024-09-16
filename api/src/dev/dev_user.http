@@ -19,7 +19,7 @@ GET http://localhost:8000/api/users/recommended/show?user_id=21
 Accept: application/json
 
 ### 受信メールリスト取得
-GET http://localhost:8000/api/users/mail/show?user_id=21
+GET http://localhost:8000/api/users/mail/show?user_id=3
 Accept: application/json
 
 ### 所持アイテムリスト取得

@@ -21,6 +21,7 @@ use App\Models\MailLogs;
 use App\Models\NGWord;
 use App\Models\StageResult;
 use App\Models\User;
+use App\Models\UserAchievement;
 use App\Models\UserItem;
 use App\Models\UserMail;
 use Exception;
@@ -33,6 +34,7 @@ class UserController extends Controller
 {
     const FOLLOW_LIMIT_MAX = 30;
     const STAGE_LIMIT_MAX = 22;
+    const ITEM_POINT_ID = 37;
 
     // 救難信号システムを解放するアイテムID
     const ITEM_DISTRESS_SIGNAL_ENABLED_ID = 35;
@@ -470,22 +472,45 @@ class UserController extends Controller
     public function showMail(Request $request)
     {
         $user = User::findOrFail($request->user_id);
-        $user_mails = $user->mails;
+        $sub_query = DB::raw('(SELECT * FROM users where id = ' . $request->user_id . ' ) AS users');
+        $user_mails = Mail::selectRaw('user_mails.id AS id,user_mails.mail_id AS mail_id,title,text,user_mails.is_received AS is_received,user_mails.created_at AS created_at,(30 - DATEDIFF(now(),user_mails.created_at)) AS elapsed_days')
+            ->join('user_mails', 'mails.id', '=', 'user_mails.mail_id')
+            ->join($sub_query, 'user_mails.user_id', '=', 'users.id')
+            ->where('user_mails.user_id', '=', $user->id)
+            ->get();
+        $response = [];
         foreach ($user_mails as $mail) {
             $frag = MailLogs::where('user_id', '=', $request->user_id)
-                ->where("mail_id", "=", $mail->pivot->mail_id)->exists();
+                ->where("mail_id", "=", $mail->mail_id)->exists();
             // ログに未登録の受信メールの場合
             if (!$frag) {
                 // ログテーブル登録処理
                 MailLogs::create([
                     'user_id' => $request->user_id,
-                    'mail_id' => $mail->pivot->mail_id,
+                    'mail_id' => $mail->mail_id,
                     'action' => 0
                 ]);
             }
+
+            // 生成してから30日が経過している場合は削除する
+            if ($mail->elapsed_days <= 0) {
+                DB::transaction(function () use ($request, $mail) {
+                    // ログテーブル登録処理
+                    MailLogs::create([
+                        'user_id' => $request->user_id,
+                        'mail_id' => $mail->mail_id,
+                        'action' => 0
+                    ]);
+
+                    // 削除処理
+                    UserMail::where('id', '=', $mail->id)->delete();
+                });
+            } else {
+                $response[] = $mail;
+            }
         }
 
-        return response()->json(UserMailResource::collection($user_mails));
+        return response()->json(UserMailResource::collection($response));
     }
 
     // 受信メール開封
@@ -697,6 +722,11 @@ class UserController extends Controller
             $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
                 ->where('following_user_id', '=', $user->id)->exists();
             $results[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+
+            // 相手をフォローしているかどうか取得
+            $isFollow = FollowingUser::where('user_id', '=', $request->user_id)
+                ->where('following_user_id', '=', $results[$i]['user_id'])->exists();
+            $results[$i]['is_follow'] = $isFollow === true ? 1 : 0;
         }
 
         return response()->json($results);

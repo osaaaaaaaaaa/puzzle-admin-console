@@ -20,7 +20,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 21,
+    "user_id": 3,
     "stage_id": 2
 }
 
@@ -39,7 +39,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 4
+    "d_signal_id": 11
 }
 
 ### 参加ゲストの情報取得
