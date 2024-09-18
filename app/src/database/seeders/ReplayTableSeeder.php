@@ -9,9 +9,9 @@ class ReplayTableSeeder extends Seeder
 {
     public function run(): void
     {
-        /*        Replay::create([
-                    'distress_signal_id' => 1,
-                    'replay_data' => '{}',
-                ]);*/
+        Replay::create([
+            'distress_signal_id' => 1,
+            'replay_data' => '{}',
+        ]);
     }
 }

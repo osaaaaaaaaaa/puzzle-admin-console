@@ -2,6 +2,27 @@
 use admin_console;
 
 show tables;
+SELECT * from ng_words;
+
+DROP TABLE accounts;
+DROP TABLE attached__items;
+DROP TABLE distress_signals;
+DROP TABLE follow_logs;
+DROP TABLE following_users;
+DROP TABLE guests;
+DROP TABLE item_logs;
+DROP TABLE items;
+DROP TABLE mail_logs;
+DROP TABLE mails;
+DROP TABLE migrations;
+DROP TABLE ng_words;
+DROP TABLE replays;
+DROP TABLE stage_results;
+DROP TABLE user_achievements;
+DROP TABLE user_items;
+DROP TABLE user_mails;
+DROP TABLE users;
+DROP TABLE achievements;
 
 # 自身が発信していない && 自身が参加していない && ゲストの参加人数が2人未満の救難信号をランダムに10件まで取得
 SELECT d_signals.id AS d_signal_id,d_signals.user_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest, d_signals.created_at from distress_signals AS d_signals

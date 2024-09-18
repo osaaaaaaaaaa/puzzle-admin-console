@@ -47,12 +47,12 @@ Accept: application/json
 //**********************************************************
 
 ### ユーザー情報登録
-POST http://localhost:8000/api/users/store
+POST https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/store
 Content-Type: application/json
 Accept: application/json
 
 {
-    "name": "22222"
+    "name": "APITEST"
 }
 
 ### ユーザー情報更新
@@ -126,10 +126,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 1,
-    "stage_id": 5,
-    "is_medal1": 0,
-    "is_medal2": 0,
+    "user_id": 21,
+    "stage_id": 22,
+    "is_medal1": 1,
+    "is_medal2": 1,
     "time": 34.56,
     "score": 500
 }

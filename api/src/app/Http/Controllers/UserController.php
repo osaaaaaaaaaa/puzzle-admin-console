@@ -12,6 +12,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Resources\UserRewardItemResource;
 use App\Models\Achievement;
 use App\Models\Attached_Item;
+use App\Models\Constant;
 use App\Models\FollowingUser;
 use App\Models\FollowLogs;
 use App\Models\Item;
@@ -34,8 +35,7 @@ use Symfony\Component\ErrorHandler\Debug;
 class UserController extends Controller
 {
     const FOLLOW_LIMIT_MAX = 30;
-    const STAGE_LIMIT_MAX = 22;
-    const ITEM_POINT_ID = 37;
+    const STAGE_LIMIT_TYPE = 1;
 
     // 救難信号システムを解放するアイテムID
     const ITEM_DISTRESS_SIGNAL_ENABLED_ID = 35;
@@ -688,8 +688,11 @@ class UserController extends Controller
                 }
                 $stage_result->save();
 
+                // ステージ最大数取得
+                $stageMax = Constant::where('type', '=', self::STAGE_LIMIT_TYPE)->first();
+
                 // ステージが初クリア&&ステージ上限値以下の場合はユーザーのステージIDを加算する
-                $user->stage_id += $request->stage_id == $user->stage_id && $user->stage_id < self::STAGE_LIMIT_MAX ? 1 : 0;
+                $user->stage_id += $request->stage_id == $user->stage_id && $user->stage_id < $stageMax->constant ? 1 : 0;
                 $user->save();
 
                 return StageResultResource::make($stage_result);
