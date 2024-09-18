@@ -25,7 +25,7 @@ class User extends Model
     // ステージリザルトのリレーション
     public function stageresult()
     {
-        return $this->hasMany(Stageresult::class, 'user_id', 'id');
+        return $this->hasMany(StageResult::class, 'user_id', 'id');
     }
 
     // 合計ポイントを取得するリレーション

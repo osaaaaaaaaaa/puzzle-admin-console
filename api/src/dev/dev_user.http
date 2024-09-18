@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
 ### ステージリザルト取得
-GET http://localhost:8000/api/users/stage/result/show?user_id=1
+GET https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/stage/result/show?user_id=1
 Accept: application/json
 
 //**********************************************************
@@ -121,15 +121,15 @@ Accept: application/json
 }
 
 ### ステージクリア処理
-POST http://localhost:8000/api/users/stage/clear/update
+POST https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/stage/clear/update
 Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 21,
-    "stage_id": 22,
+    "user_id": 1,
+    "stage_id": 1,
     "is_medal1": 1,
     "is_medal2": 1,
     "time": 34.56,
-    "score": 500
+    "score": 1200
 }
