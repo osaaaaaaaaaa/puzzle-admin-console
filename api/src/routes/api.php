@@ -51,9 +51,9 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
 
     // アチーブメントの達成状況更新
     Route::post('users/achievements/update', [AchievementController::class, 'update'])->name('achievements.update');
-    // アチーブメント報酬受け取り処理
-    Route::post('users/achievements/reward/update',
-        [AchievementController::class, 'updateReward'])->name('achievements.reward.update');
+    // アチーブメント報酬受け取り
+    Route::post('users/achievements/receive',
+        [AchievementController::class, 'receive'])->name('achievements.receive');
 
     // [ 救難信号 ] #####################################################################################################
 

@@ -8,27 +8,28 @@ use Illuminate\Support\Facades\Storage;
 
 class AchievementTableSeeder extends Seeder
 {
-    const STAGE_MAX_CNT = 22;
-    const POINT_AMOUNT = 10;
+    const STAGE_MAX_CNT = 30;
 
     // [タイプ] 1:ステージクリア, 2:スコア, 3:ポイント報酬
     public function run(): void
     {
-        for ($i = 0; $i < self::STAGE_MAX_CNT; $i++) {
-            Achievement::create([
-                'text' => 'ステージ' . ($i + 1) . 'を初回クリアしよう',
-                'type' => 1,
-                'achieved_val' => $i + 1,
-                'item_id' => 37,
-                'item_amount' => self::POINT_AMOUNT
-            ]);
-            Achievement::create([
-                'text' => 'トータルスコア' . (1200 * ($i + 1)) . 'を達成しよう',
-                'type' => 2,
-                'achieved_val' => 1200 * ($i + 1),
-                'item_id' => 37,
-                'item_amount' => self::POINT_AMOUNT
-            ]);
+        for ($i = 1; $i < self::STAGE_MAX_CNT + 1; $i++) {
+            if ($i % 2 == 0 && $i > 1) {
+                Achievement::create([
+                    'text' => 'ステージ' . $i . 'を初回クリアしよう',
+                    'type' => 1,
+                    'achieved_val' => $i,
+                    'item_id' => 37,
+                    'item_amount' => 20
+                ]);
+                Achievement::create([
+                    'text' => 'トータルスコア' . (1200 * $i) . 'を達成しよう',
+                    'type' => 2,
+                    'achieved_val' => 1200 * $i,
+                    'item_id' => 37,
+                    'item_amount' => 20
+                ]);
+            }
         }
 
         // Storageファザードを使って読み込む

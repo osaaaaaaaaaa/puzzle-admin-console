@@ -39,7 +39,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "d_signal_id": 11
+    "d_signal_id": 3
 }
 
 ### 参加ゲストの情報取得

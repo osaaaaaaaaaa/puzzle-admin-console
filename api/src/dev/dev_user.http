@@ -19,7 +19,7 @@ GET http://localhost:8000/api/users/recommended/show?user_id=21
 Accept: application/json
 
 ### 受信メールリスト取得
-GET http://localhost:8000/api/users/mail/show?user_id=3
+GET http://localhost:8000/api/users/mail/show?user_id=21
 Accept: application/json
 
 ### 所持アイテムリスト取得
@@ -106,8 +106,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 1,
-    "mail_id": 2
+    "user_id": 21,
+    "user_mail_id": 11
 }
 
 ### 受信メール削除
@@ -117,7 +117,7 @@ Accept: application/json
 
 {
     "user_id": 3,
-    "mail_id": 1
+    "user_mail_id": 1
 }
 
 ### ステージクリア処理

@@ -10,7 +10,7 @@ class ConstantTableSeeder extends Seeder
     public function run(): void
     {
         Constant::create([
-            'constant' => 22,
+            'constant' => 30,
             'type' => 1,
         ]);
         Constant::create([

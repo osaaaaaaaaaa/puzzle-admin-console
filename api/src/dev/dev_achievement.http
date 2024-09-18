@@ -14,5 +14,15 @@ Accept: application/json
 {
     "user_id": 21,
     "type": 1,
-    "allie_val": 10
+    "allie_val": 1
+}
+
+### アチーブメント報酬受け取り
+POST http://localhost:8000/api/users/achievements/receive
+Content-Type: application/json
+Accept: application/json
+
+{
+    "achievement_id": 32,
+    "user_id": 21
 }

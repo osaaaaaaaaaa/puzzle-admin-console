@@ -9,6 +9,7 @@ use App\Http\Resources\UserItemResource;
 use App\Http\Resources\UserMailResource;
 use App\Http\Resources\UserRecommendedResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\UserRewardItemResource;
 use App\Models\Achievement;
 use App\Models\Attached_Item;
 use App\Models\FollowingUser;
@@ -110,7 +111,7 @@ class UserController extends Controller
                 $items = Item::whereIn('id', [1, 3])
                     ->orWhere(function ($query) use ($request) {
                         $query->where('id', '>=', 10)
-                            ->where('id', '<=', 28);
+                            ->where('id', '<=', 27);
                     })->get();
 
                 foreach ($items as $item) {
@@ -519,7 +520,7 @@ class UserController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'user_id' => ['required', 'int'],
-            'mail_id' => ['required', 'int']
+            'user_mail_id' => ['required', 'int']
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -529,8 +530,7 @@ class UserController extends Controller
         User::findOrFail($request->user_id);
 
         // レコード存在チェック・受け取り済みかどうかチェック
-        $userMail = UserMail::where('user_id', '=', $request->user_id)->where("mail_id", "=",
-            $request->mail_id)->get()->first();
+        $userMail = UserMail::findOrFail($request->user_mail_id);
         if (empty($userMail)) {
             abort(404);
         } elseif ($userMail->is_received === 1) {
@@ -545,7 +545,7 @@ class UserController extends Controller
             $item_id = DB::transaction(function () use ($request, $userMail) {
 
                 // メールの添付アイテムを取得
-                $attachedItems = Attached_Item::where('mail_id', '=', $request->mail_id)->get();
+                $attachedItems = Attached_Item::where('mail_id', '=', $userMail->mail_id)->get();
                 foreach ($attachedItems as $item) {
 
                     // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
@@ -566,7 +566,7 @@ class UserController extends Controller
                 // ログテーブル登録処理
                 MailLogs::create([
                     'user_id' => $request->user_id,
-                    'mail_id' => $request->mail_id,
+                    'mail_id' => $request->user_mail_id,
                     'action' => 1
                 ]);
 
@@ -580,7 +580,7 @@ class UserController extends Controller
                 for ($i = 0; $i < count($items); $i++) {
                     $items[$i] += ['amount' => $item_id[$i]->amount];
                 }
-                return response()->json(UpdateUserMailResource::collection($items));
+                return response()->json(UserRewardItemResource::collection($items));
             }
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -593,7 +593,7 @@ class UserController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'user_id' => ['required', 'int'],
-            'mail_id' => ['required', 'int'],
+            'user_mail_id' => ['required', 'int'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -606,12 +606,12 @@ class UserController extends Controller
             // トランザクション処理
             DB::transaction(function () use ($request) {
                 // 削除処理
-                UserMail::where('user_id', '=', $request->user_id)->where('mail_id', '=', $request->mail_id)->delete();
+                UserMail::where('user_id', '=', $request->user_id)->where('id', '=', $request->user_mail_id)->delete();
 
                 // ログテーブル登録処理
                 MailLogs::create([
                     'user_id' => $request->user_id,
-                    'mail_id' => $request->mail_id,
+                    'mail_id' => $request->user_mail_id,
                     'action' => 0
                 ]);
             });

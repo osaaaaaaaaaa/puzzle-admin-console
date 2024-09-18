@@ -9,15 +9,15 @@ class MailLogsTableSeeder extends Seeder
 {
     public function run(): void
     {
-        MailLogs::create([
-            'user_id' => 1,
-            'mail_id' => 1,
-            'action' => 0,
-        ]);
-        MailLogs::create([
-            'user_id' => 1,
-            'mail_id' => 1,
-            'action' => 1,
-        ]);
+        /*        MailLogs::create([
+                    'user_id' => 1,
+                    'mail_id' => 1,
+                    'action' => 0,
+                ]);
+                MailLogs::create([
+                    'user_id' => 1,
+                    'mail_id' => 1,
+                    'action' => 1,
+                ]);*/
     }
 }
