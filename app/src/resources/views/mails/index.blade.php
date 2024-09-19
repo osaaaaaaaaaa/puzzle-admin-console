@@ -12,6 +12,7 @@
                     <thead class="table-primary">
                     <tr>
                         <th>ID</th>
+                        <th>タイトル</th>
                         <th>テキスト</th>
                         <th>アイテム</th>
                         <th>生成日</th>
@@ -23,6 +24,7 @@
                         @for($i = 0;$i < count($mailData);$i++)
                             <tr>
                                 <td>{{$mailData[$i]['id']}}</td>
+                                <td>{{$mailData[$i]['title']}}</td>
                                 <td>{{$mailData[$i]['text']}}</td>
                                 <td>{{$mailData[$i]['item']}}</td>
                                 <td>{{$mailData[$i]['created_at']}}</td>

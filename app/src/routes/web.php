@@ -3,15 +3,15 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConstantController;
 use App\Http\Controllers\DistressSignalController;
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\LevelController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\NGWordController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\NoCacheMiddleware;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // ミドルウェアのルートを通す(キャッシュを保存しない)
@@ -33,6 +33,10 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     // [ マスタデータ ] ##########################################################################
 
     Route::prefix('')->middleware([AuthMiddleware::class])->group(function () {
+        // NGワード一覧表示
+        Route::get('ngwords/index', [NGWordController::class, 'index'])->name('ngwords.index');
+        // 定数一覧表示
+        Route::get('constants/index', [ConstantController::class, 'index'])->name('constants.index');
         // アイテム一覧表示
         Route::get('items/index', [ItemController::class, 'index'])->name('items.index');
         // アチーブメント一覧表示

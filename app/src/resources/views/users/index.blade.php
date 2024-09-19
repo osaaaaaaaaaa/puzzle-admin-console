@@ -19,8 +19,8 @@
                         </div>
                     </div>
                 </form>
-                @if(!empty($users))
-                    {{$users->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
+                @if(!empty($userData) && empty($requestID))
+                    {{$userData->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
                 @endif
                 <table class="table table-hover">
                     <thead class="table-primary">
@@ -28,18 +28,31 @@
                         <th>ID</th>
                         <th>ユーザー名</th>
                         <th>称号</th>
+                        <th>トータルスコア</th>
                         <th>最新のステージ</th>
                     </tr>
                     </thead>
                     <tbody class="table-light">
-                    @if(!empty($level))
-                        <tr>
-                            <td>{{$user->id}}</td>
-                            <td>{{$user->name}}</td>
-                            <td>{{$achievement->title}}</td>
-                            <td>{{$user->stage_id}}</td>
-                        </tr>
+                    @if(!empty($userData))
+                        @foreach($userData as $data)
+                            <tr>
+                                <td>{{$data['id']}}</td>
+                                <td>{{$data['name']}}</td>
+                                <td>{{$data['title']}}</td>
+                                <td>{{$data['total_score']}}</td>
+                                <td>{{$data['stage_id']}}</td>
+                            </tr>
+                        @endforeach
                     @endif
+                    {{--                    @if(!empty($user))
+                                            <tr>
+                                                <td>{{$users->id}}</td>
+                                                <td>{{$users->name}}</td>
+                                                <td>{{$title == null ? '' : $title}}</td>
+                                                <td>{{$total_score == null ? 0 : $total_score}}</td>
+                                                <td>{{$user->stage_id}}</td>
+                                            </tr>
+                                        @endif--}}
                     </tbody>
                 </table>
                 <br>

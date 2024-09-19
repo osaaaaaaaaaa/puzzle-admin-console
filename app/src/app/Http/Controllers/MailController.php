@@ -45,6 +45,7 @@ class MailController extends Controller
             // データを格納する
             $array = [
                 'id' => $mails[$i]['id'],
+                'title' => $mails[$i]['title'],
                 'text' => $mails[$i]['text'],
                 'item' => $itemData,
                 'created_at' => $mails[$i]['created_at'],
@@ -74,7 +75,6 @@ class MailController extends Controller
     {
         // ユーザー情報を取得する
         $userMax = User::count();
-
         // アイテム情報を取得する
         $items = Item::All();
 
@@ -86,6 +86,7 @@ class MailController extends Controller
     {
         // カスタムバリデーション
         $validator = Validator::make($request->all(), [
+            'title' => ['required'],
             'text' => ['required'],
             'type_cnt' => ['required']
         ]);
@@ -102,7 +103,7 @@ class MailController extends Controller
         $mailID_max = Mail::max('id');  // 最新のメールID
 
         // メールマスタにレコードを追加
-        Mail::create(['text' => $request->text]);
+        Mail::create(['title' => $request->title, 'text' => $request->text]);
 
         // 添付するアイテムをレコードに追加
         if ($request->type_cnt > 0) {

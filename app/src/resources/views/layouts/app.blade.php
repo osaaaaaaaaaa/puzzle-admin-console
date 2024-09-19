@@ -23,6 +23,8 @@
                         </a>
                         <!-- ドロップメニューの設定 -->
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('ngwords.index')}}">NGワード一覧表示</a></li>
+                            <li><a class="dropdown-item" href="{{ route('constants.index')}}">定数一覧表示</a></li>
                             <li><a class="dropdown-item" href="{{ route('items.index')}}">アイテム一覧表示</a></li>
                             <li><a class="dropdown-item"
                                    href="{{ route('achievements.index')}}">アチーブメント一覧表示</a></li>

@@ -12,7 +12,6 @@
                     <thead class="table-primary">
                     <tr>
                         <th>ID</th>
-                        <th>称号</th>
                         <th>達成条件テキスト</th>
                         <th>種類</th>
                         <th>達成条件値</th>
@@ -25,7 +24,6 @@
                         @foreach($achievements as $data)
                             <tr>
                                 <td>{{$data['id']}}</td>
-                                <td>{{$data['title']}}</td>
                                 <td>{{$data['text']}}</td>
                                 <td>{{$data['type']}}</td>
                                 <td>{{$data['achieved_val']}}</td>

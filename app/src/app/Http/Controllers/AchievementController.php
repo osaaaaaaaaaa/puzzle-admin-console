@@ -32,30 +32,46 @@ class AchievementController extends Controller
             // 種類を文字列に出力する
             switch ($achievements[$i]->type) {
                 case 1:
-                    $type = 'その他';
+                    $type = 'ステージ初回クリア';
                     break;
                 case 2:
-                    $type = 'レベル';
+                    $type = 'トータルスコア';
                     break;
                 case 3:
-                    $type = 'ステージ';
-                    break;
-                case 4:
-                    $type = '救難信号';
-                    break;
-                default:
-                    $type = 'NULL';
+                    $type = 'ポイント報酬';
                     break;
             }
+
+            $strMerge = '';
+            switch ($item[0]['type']) {
+                case 1:
+                    $strMerge = 'アイコン';
+                    break;
+                case 2:
+                    $strMerge = '称号';
+                    break;
+                case 3:
+                    $strMerge = 'お助けアイテム';
+                    break;
+                case 4:
+                    $strMerge = '救難信号解放';
+                    break;
+                case 5:
+                    $strMerge = '救難信号の上限値UP';
+                    break;
+                case 6:
+                    $strMerge = 'ポイント';
+                    break;
+            }
+            $strItem = '[' . $strMerge . '] ' . $item[0]['name'];
 
             // データを格納する
             $array = [
                 'id' => $achievements[$i]['id'],
-                'title' => $achievements[$i]['title'],
                 'text' => $achievements[$i]['text'],
                 'type' => $type,
                 'achieved_val' => $achievements[$i]['achieved_val'],
-                'item' => $item[0]['name'],
+                'item' => $strItem,
                 'item_amount' => $achievements[$i]['item_amount']
             ];
             $achievementData[$i] = $array;
@@ -73,14 +89,37 @@ class AchievementController extends Controller
     {
         // アチーブメントの種類
         $type = [
-            ['name' => 'その他'],
-            ['name' => 'レベル'],
-            ['name' => 'ステージ'],
-            ['name' => '救難信号'],
+            ['name' => 'ステージ初回クリア'],
+            ['name' => 'トータルスコア'],
+            ['name' => 'ポイント報酬'],
         ];
 
         // アイテム情報を取得する
         $items = Item::All();
+        for ($i = 0; $i < count($items); $i++) {
+            $strMerge = '';
+            switch ($items[$i]['type']) {
+                case 1:
+                    $strMerge = 'アイコン';
+                    break;
+                case 2:
+                    $strMerge = '称号';
+                    break;
+                case 3:
+                    $strMerge = 'お助けアイテム';
+                    break;
+                case 4:
+                    $strMerge = '救難信号解放';
+                    break;
+                case 5:
+                    $strMerge = '救難信号の上限値UP';
+                    break;
+                case 6:
+                    $strMerge = 'ポイント';
+                    break;
+            }
+            $items[$i]['name'] = '[' . $strMerge . '] ' . $items[$i]['name'];
+        }
 
         return view('achievements/create', ['type' => $type, 'items' => $items, 'normally' => $request['normally']]);
     }
@@ -90,7 +129,6 @@ class AchievementController extends Controller
     {
         // カスタムバリデーション
         $validator = Validator::make($request->all(), [
-            'title' => ['max:20'],
             'text' => ['required', 'max:40'],
             'type' => ['required'],
             'achieved_val' => ['required'],
@@ -104,13 +142,8 @@ class AchievementController extends Controller
                 ->withInput();
         }
 
-        if (empty($request->title)) {
-            $request->title = '';
-        }
-
         // 挿入処理
         Achievement::create([
-            'title' => $request->title,
             'text' => $request->text,
             'type' => $request->type,
             'achieved_val' => $request->achieved_val,

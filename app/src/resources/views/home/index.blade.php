@@ -14,6 +14,16 @@
         <div class="row d-flex flex-row justify-content-evenly" style="text-align:center">
             <div class="col-md-2 border rounded-3 bg-body-tertiary">
                 <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">NGワード一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('ngwords.index')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
+                <h4 class="fw-normal">定数一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('constants.index')}}">View details »</a></p>
+            </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-boxes home-icon"></i>
                 <h4 class="fw-normal">アイテム一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('items.index')}}">View details »</a></p>
             </div>

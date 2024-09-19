@@ -24,8 +24,9 @@
                 <table class="table table-hover">
                     <thead class="table-primary">
                     <tr>
-                        <th>ID</th>
+                        <th>アイテムID</th>
                         <th>ユーザー名</th>
+                        <th>タイプ</th>
                         <th>アイテム名</th>
                         <th>所持個数</th>
                     </tr>
@@ -36,6 +37,7 @@
                             <tr>
                                 <td>{{$item->id}}</td>
                                 <td>{{$user->name}}</td>
+                                <td>{{$item->type}}</td>
                                 <td>{{$item->name}}</td>
                                 <td>{{$item->pivot->amount}}</td>
                             </tr>

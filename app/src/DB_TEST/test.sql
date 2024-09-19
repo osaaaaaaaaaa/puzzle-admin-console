@@ -2,6 +2,8 @@
 use admin_console;
 
 show tables;
+SELECT * FROM users;
+SELECT * FROM stage_results;
 SELECT * from ng_words;
 
 DROP TABLE accounts;

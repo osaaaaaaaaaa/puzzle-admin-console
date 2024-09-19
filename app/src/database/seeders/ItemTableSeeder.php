@@ -16,7 +16,8 @@ class ItemTableSeeder extends Seeder
     2:称号,
     3:お助けアイテム,
     4:救難信号解放,
-    5:救難信号の上限値UP,*/
+    5:救難信号の上限値UP,
+    6:ポイント*/
 
     /**
      * Run the database seeds.

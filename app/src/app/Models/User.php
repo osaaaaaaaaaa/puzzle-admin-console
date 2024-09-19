@@ -13,11 +13,18 @@ class User extends Model
     protected $guarded = [
         'id',
     ];
-    
-    // アチーブメントの称号を取得するリレーション
-    public function achievements()
+
+    // 称号を取得するリレーション
+    public function gettitle()
     {
-        return $this->hasMany(Achievement::class, 'id');
+        return $this->hasMany(Item::class, 'id', 'title_id');
+    }
+
+    // 合計スコアを取得するリレーション
+    public function totalscore()
+    {
+        return $this->hasMany(StageResult::class, 'user_id', 'id')
+            ->selectRaw('SUM(score) AS total_score')->groupBy('user_id');
     }
 
     // 所持アイテムのリレーション

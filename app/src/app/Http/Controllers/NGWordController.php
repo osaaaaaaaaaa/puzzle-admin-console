@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
+use App\Models\NGWord;
 use Illuminate\Http\Request;
 
-class ItemController
+class NGWordController extends Controller
 {
-    // アイテム一覧表示
     public function index(Request $request)
     {
         // アカウントテーブルから全てのレコードを取得する
-        $items = Item::paginate(20);
-        return view('items/index', ['items' => $items]);
+        $ngwords = NGWord::paginate(20);
+        return view('ngwords/index', ['ngwords' => $ngwords]);
     }
 }

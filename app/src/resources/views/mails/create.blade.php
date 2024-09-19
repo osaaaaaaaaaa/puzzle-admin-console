@@ -23,6 +23,12 @@
                         </div>
                         <br>
                         <div class="col-md-12">
+                            <label for="title" class="form-label">タイトル</label>
+                            <textarea id="textarea" class="form-control" name="title"
+                                      placeholder="タイトルを入力" required></textarea>
+                        </div>
+                        <br>
+                        <div class="col-md-12">
                             <label for="text" class="form-label">テキスト</label>
                             <textarea id="textarea" class="form-control" name="text"
                                       placeholder="テキストを入力" required></textarea>

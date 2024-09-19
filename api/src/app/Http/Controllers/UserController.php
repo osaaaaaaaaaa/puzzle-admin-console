@@ -3,34 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\StageResultResource;
-use App\Http\Resources\UpdateUserMailResource;
 use App\Http\Resources\UserFollowResource;
 use App\Http\Resources\UserItemResource;
 use App\Http\Resources\UserMailResource;
 use App\Http\Resources\UserRecommendedResource;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\UserRewardItemResource;
-use App\Models\Achievement;
 use App\Models\Attached_Item;
 use App\Models\Constant;
 use App\Models\FollowingUser;
 use App\Models\FollowLogs;
 use App\Models\Item;
 use App\Models\ItemLogs;
-use App\Models\Level;
 use App\Models\Mail;
 use App\Models\MailLogs;
 use App\Models\NGWord;
 use App\Models\StageResult;
 use App\Models\User;
-use App\Models\UserAchievement;
 use App\Models\UserItem;
 use App\Models\UserMail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\ErrorHandler\Debug;
 
 class UserController extends Controller
 {

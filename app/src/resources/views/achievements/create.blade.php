@@ -10,11 +10,6 @@
                 <div>
                     <form class="needs-validation" method="get" action="{{ route('achievements.store')}}">
                         @csrf
-                        <div class="col-md-12">
-                            <label for="text" class="form-label">称号(任意)</label>
-                            <textarea id="textarea" class="form-control" name="text"
-                                      placeholder="称号を入力"></textarea>
-                        </div>
                         <br>
                         <div class="col-md-12">
                             <label for="text" class="form-label">達成条件のテキスト</label>
