@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
 ### ステージリザルト取得
-GET https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/stage/result/show?user_id=1
+GET https://localhost:8000/api/users/stage/result/show?user_id=1
 Accept: application/json
 
 //**********************************************************
@@ -47,7 +47,7 @@ Accept: application/json
 //**********************************************************
 
 ### ユーザー情報登録
-POST https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/store
+POST https://localhost:8000/api/users/store
 Content-Type: application/json
 Accept: application/json
 
@@ -56,15 +56,15 @@ Accept: application/json
 }
 
 ### ユーザー情報更新
-POST http://localhost:8000/api/users/update
+POST https://localhost:8000/api/users/update
 Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 21,
-    "name": "test",
-    "title_id": 12,
-    "stage_id": 1,
+    "user_id": 6,
+    "name": "かいと",
+    "title_id": 0,
+    "stage_id": 0,
     "icon_id": 1
 }
 

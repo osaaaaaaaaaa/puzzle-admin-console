@@ -10,6 +10,6 @@ class UserTableSeeder extends Seeder
     public function run(): void
     {
         // テストデータを挿入
-        User::factory(20)->create(); // 引数は何回呼び出すか
+        /*        User::factory(20)->create(); // 引数は何回呼び出すか*/
     }
 }

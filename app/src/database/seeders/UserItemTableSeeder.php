@@ -9,17 +9,17 @@ class UserItemTableSeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 1; $i < 10; $i++) {
-            UserItem::create([
-                'user_id' => $i,
-                'item_id' => 10,
-                'amount' => 1
-            ]);
-            UserItem::create([
-                'user_id' => $i,
-                'item_id' => 11,
-                'amount' => 1
-            ]);
-        }
+        /*        for ($i = 1; $i < 10; $i++) {
+                    UserItem::create([
+                        'user_id' => $i,
+                        'item_id' => 10,
+                        'amount' => 1
+                    ]);
+                    UserItem::create([
+                        'user_id' => $i,
+                        'item_id' => 11,
+                        'amount' => 1
+                    ]);
+                }*/
     }
 }

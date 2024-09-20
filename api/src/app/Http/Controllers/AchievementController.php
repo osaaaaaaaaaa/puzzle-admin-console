@@ -33,67 +33,58 @@ class AchievementController extends Controller
         User::findOrFail($request->user_id);
 
         // アチーブメントマスタを取得
-        $achievements = Achievement::All();
+        $achievements = Achievement::selectRaw('achievements.id AS achievement_id,text,achievements.type AS achievement_type,
+        achieved_val,item_id,item_amount,items.name AS item_name,items.type AS item_type,
+        effect AS item_effect,description AS item_description')
+            ->join('items', 'items.id', '=', 'achievements.item_id')->get();
+
+        // アチーブメント達成状況取得
+        $user_achievement = UserAchievement::where('user_id', '=', $request->user_id)
+            ->whereIn('achievement_id', $achievements->pluck('achievement_id'))->get()->toArray();
 
         // 返すデータを格納する
         $response = [];
+        $achievements = $achievements->toArray();
         for ($i = 0; $i < count($achievements); $i++) {
-            // アチーブメント達成状況取得
-            $user_achievement = UserAchievement::where('user_id', '=', $request->user_id)
-                ->where('achievement_id', '=', $achievements[$i]->id)->first();
 
-            // アイテム情報を取得
-            $item = Item::where('id', '=', $achievements[$i]->item_id)->first();
+            $key = array_search($achievements[$i]['achievement_id'],
+                array_column($user_achievement, 'achievement_id'));
 
-            // 達成状況を取得できた場合
-            if (!empty($user_achievement)) {
+            // 達成状況を取得できた場かどうか、厳密にチェック
+            $progress_val = 0;
+            $is_receive_item = 0;
+            $is_achieved = 0;
+            if (!($key === false)) {
+                $progress_val = $user_achievement[$key]['progress_val'];
+                $is_receive_item = $user_achievement[$key]['is_receive_item'];
 
                 // アチーブメントを達成しているかどうか
-                $is_achieved = $user_achievement->progress_val >= $achievements[$i]->achieved_val ? 1 : 0;
-
-                // データを格納する
-                $response[$i] = [
-                    'achievement_id' => $achievements[$i]->id,
-                    'text' => $achievements[$i]->text,
-                    'type' => $achievements[$i]->type,
-                    'achieved_val' => $achievements[$i]->achieved_val,
-                    'progress_val' => $user_achievement->progress_val,
-                    'is_achieved' => $is_achieved,
-                    'is_receive_item' => $user_achievement->is_receive_item,
-                    'item' => [
-                        'item_id' => $achievements[$i]->item_id,
-                        'name' => $item->name,
-                        'type' => $item->type,
-                        'effect' => $item->effect,
-                        'description' => $item->description,
-                        'amount' => $achievements[$i]->item_amount
-                    ]
-                ];
-
-            } else {
-                // データを格納する
-                $response[$i] = [
-                    'achievement_id' => $achievements[$i]->id,
-                    'text' => $achievements[$i]->text,
-                    'type' => $achievements[$i]->type,
-                    'achieved_val' => $achievements[$i]->achieved_val,
-                    'progress_val' => 0,
-                    'is_achieved' => 0,
-                    'is_receive_item' => 0,
-                    'item' => [
-                        'item_id' => $achievements[$i]->item_id,
-                        'name' => $item->name,
-                        'type' => $item->type,
-                        'effect' => $item->effect,
-                        'description' => $item->description,
-                        'amount' => $achievements[$i]->item_amount
-                    ]
-                ];
+                $is_achieved = $user_achievement[$key]['progress_val'] >= $achievements[$i]['achieved_val'] ? 1 : 0;
             }
+
+            // データを格納する
+            $response[$i] = [
+                'achievement_id' => $achievements[$i]['achievement_id'],
+                'text' => $achievements[$i]['text'],
+                'type' => $achievements[$i]['achievement_type'],
+                'achieved_val' => $achievements[$i]['achieved_val'],
+                'progress_val' => $progress_val,
+                'is_achieved' => $is_achieved,
+                'is_receive_item' => $is_receive_item,
+                'item' => [
+                    'item_id' => $achievements[$i]['item_id'],
+                    'name' => $achievements[$i]['item_name'],
+                    'type' => $achievements[$i]['item_type'],
+                    'effect' => $achievements[$i]['item_effect'],
+                    'description' => $achievements[$i]['item_description'],
+                    'amount' => $achievements[$i]['item_amount']
+                ]
+            ];
         }
 
         return response()->json($response);
     }
+
 
     // アチーブメント達成状況更新
     public function update(Request $request)
@@ -130,7 +121,7 @@ class AchievementController extends Controller
 
         try {
             // トランザクション処理
-            DB::transaction(function () use ($request, $achievements, $total_score) {
+            DB::transaction(function () use ($request, $user, $achievements, $total_score) {
                 foreach ($achievements as $achievement) {
 
                     // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
@@ -145,8 +136,7 @@ class AchievementController extends Controller
                         // アチーブメント達成進捗値を更新する
                         if ($request->type == 1) {
                             // 初回ステージクリアの場合
-                            $total_achievement_value = $user_achievement->progress_val + $request->allie_val;
-                            $user_achievement->progress_val = $total_achievement_value <= 0 ? 0 : $total_achievement_value;
+                            $user_achievement->progress_val = $request->allie_val < $user_achievement->progress_val ? $user_achievement->progress_val : $request->allie_val;
                         } elseif ($request->type == 2) {
                             // トータルスコアの場合
                             $user_achievement->progress_val = $total_score;

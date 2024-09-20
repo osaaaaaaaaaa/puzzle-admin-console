@@ -3,7 +3,17 @@ use admin_console;
 
 show tables;
 SELECT * FROM users;
-SELECT * FROM stage_results;
+SELECT * FROM items;
+UPDATE items SET name = '不憫な' WHERE id = 20;
+UPDATE items SET name = '存在が非常識の常識人' WHERE id = 19;
+UPDATE items SET name = 'アホウがッッ！' WHERE id = 21;
+UPDATE items SET name = '鬼母' WHERE id = 22;
+UPDATE items SET name = '神は無力だ' WHERE id = 23;
+UPDATE items SET name = 'クスクスクスクス' WHERE id = 25;
+UPDATE items SET name = '青二才' WHERE id = 28;
+UPDATE items SET name = 'グッドモ～ニング'WHERE id = 38;
+UPDATE items SET name = 'よく蹴られる' WHERE id = 39;
+
 SELECT * from ng_words;
 
 DROP TABLE accounts;

@@ -3,7 +3,7 @@
 //********************************
 
 ### アチーブメントマスタと達成状況取得
-GET http://localhost:8000/api/achievements?user_id=21
+GET http://localhost:8000/api/achievements?user_id=1
 Accept: application/json
 
 ### アチーブメント達成状況更新
