@@ -72,4 +72,10 @@ class User extends Model
     {
         return $this->hasMany(MailLogs::class);
     }
+
+    // ステージリザルトのリレーション
+    public function stageresult()
+    {
+        return $this->hasMany(StageResult::class);
+    }
 }

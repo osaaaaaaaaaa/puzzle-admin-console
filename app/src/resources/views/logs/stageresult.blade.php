@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('title','UserAchievementList')
+@section('title','StageResultList')
 @section('body')
     <div class="container p-5">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="pt-5 pb-3">■ アチーブメントの達成状況一覧</h1>
+                <h1 class="pt-5 pb-3">■ ステージリザルト一覧</h1>
                 <form class="d-flex pb-3" role="search" method="get"
-                      action="{{ route('users.achievement.show')}}">
+                      action="{{ route('logs.stageresult.show')}}">
                     @csrf
                     <div class="row">
                         <div class="col-md-8">
@@ -19,30 +19,36 @@
                         </div>
                     </div>
                 </form>
-                @if(!empty($achievements))
-                    {{$achievements->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
+                @if(!empty($logs))
+                    {{$logs->onEachSide(2)->links('vendor.pagination.bootstrap-5')}}
                 @endif
                 <table class="table table-hover">
                     <thead class="table-primary">
                     <tr>
                         <th>ID</th>
                         <th>ユーザー名</th>
-                        <th>アチーブメントID</th>
-                        <th>進捗値</th>
-                        <th>達成したかどうか</th>
+                        <th>ステージID</th>
+                        <th>メダル１</th>
+                        <th>メダル２</th>
+                        <th>クリアしたときの残り時間</th>
+                        <th>ハイスコア</th>
+                        <th>生成日</th>
                         <th>更新日</th>
                     </tr>
                     </thead>
                     <tbody class="table-light">
-                    @if(!empty($achievements))
-                        @foreach($achievements as $achievement)
+                    @if(!empty($logs))
+                        @foreach($logs as $data)
                             <tr>
-                                <td>{{$achievement->id}}</td>
+                                <td>{{$data->id}}</td>
                                 <td>{{$user->name}}</td>
-                                <td>{{$achievement->achievement_id}}</td>
-                                <td>{{$achievement->progress_val}}</td>
-                                <td>{{$achievement->is_achieved}}</td>
-                                <td>{{$achievement->updated_at}}</td>
+                                <td>{{$data->stage_id}}</td>
+                                <td>{{$data->is_medal1}}</td>
+                                <td>{{$data->is_medal2}}</td>
+                                <td>{{$data->time}}</td>
+                                <td>{{$data->score}}</td>
+                                <td>{{$data->created_at}}</td>
+                                <td>{{$data->updated_at}}</td>
                             </tr>
                         @endforeach
                     @endif

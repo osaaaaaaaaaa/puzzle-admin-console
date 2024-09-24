@@ -11,7 +11,7 @@ GET http://localhost:8000/api/distress_signals/index?user_id=1
 Accept: application/json
 
 ### 救難信号をランダムに取得
-GET http://localhost:8000/api/distress_signals/show?user_id=1
+GET https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/distress_signals/show?user_id=5
 Accept: application/json
 
 ### 救難信号登録
@@ -20,8 +20,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 3,
-    "stage_id": 2
+    "user_id": 2,
+    "stage_id": 8
 }
 
 ### 救難信号ゲームクリア

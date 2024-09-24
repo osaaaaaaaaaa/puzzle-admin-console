@@ -2,39 +2,10 @@
 use admin_console;
 
 show tables;
-SELECT * FROM users;
-SELECT * FROM items;
-UPDATE items SET name = '不憫な' WHERE id = 20;
-UPDATE items SET name = '存在が非常識の常識人' WHERE id = 19;
-UPDATE items SET name = 'アホウがッッ！' WHERE id = 21;
-UPDATE items SET name = '鬼母' WHERE id = 22;
-UPDATE items SET name = '神は無力だ' WHERE id = 23;
-UPDATE items SET name = 'クスクスクスクス' WHERE id = 25;
-UPDATE items SET name = '青二才' WHERE id = 28;
-UPDATE items SET name = 'グッドモ～ニング'WHERE id = 38;
+SELECT * FROM stage_results where user_id = 21;
+SELECT * FROM users WHERE id = 23;
+UPDATE users SET stage_id = 30 WHERE id = 23;
 UPDATE items SET name = 'よく蹴られる' WHERE id = 39;
-
-SELECT * from ng_words;
-
-DROP TABLE accounts;
-DROP TABLE attached__items;
-DROP TABLE distress_signals;
-DROP TABLE follow_logs;
-DROP TABLE following_users;
-DROP TABLE guests;
-DROP TABLE item_logs;
-DROP TABLE items;
-DROP TABLE mail_logs;
-DROP TABLE mails;
-DROP TABLE migrations;
-DROP TABLE ng_words;
-DROP TABLE replays;
-DROP TABLE stage_results;
-DROP TABLE user_achievements;
-DROP TABLE user_items;
-DROP TABLE user_mails;
-DROP TABLE users;
-DROP TABLE achievements;
 
 # 自身が発信していない && 自身が参加していない && ゲストの参加人数が2人未満の救難信号をランダムに10件まで取得
 SELECT d_signals.id AS d_signal_id,d_signals.user_id, stage_id, action, IFNULL(cnt,0) AS cnt_guest, d_signals.created_at from distress_signals AS d_signals

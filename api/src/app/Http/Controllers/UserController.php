@@ -632,7 +632,7 @@ class UserController extends Controller
         // ステージリザルト取得のリレーション
         $result = $user->stageResult()->get();
         if (empty($result)) {
-            return response()->json(['error' => "リザルトがない"], 400);
+            return response()->json(['error' => "リザルトがない"], 404);
         }
 
         return response()->json(StageResultResource::collection($result));

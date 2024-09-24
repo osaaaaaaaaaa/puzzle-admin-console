@@ -155,7 +155,6 @@ class DistressSignalController extends Controller
         // ユーザーの存在チェック
         $user = User::findOrFail($request->user_id);
 
-
         // 相互フォローのユーザーを取得する
         $users = $user->agreement();
 
@@ -165,7 +164,7 @@ class DistressSignalController extends Controller
         // 相互フォローのユーザーが募集している救難信号（参加可能）を取得する
         $response_d_signals = null;
         $d_signal_cnt = 0;
-        $usersID = 0;
+        $usersID = [];
         if (count($users) > 0) {
             $response_d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
                 ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
@@ -182,7 +181,6 @@ class DistressSignalController extends Controller
                 ->having('cnt_guest', '<', self::MAX_GUEST_CNT)
                 ->limit(10)
                 ->get()->toArray();
-
             $d_signal_cnt = count($response_d_signals);
             $usersID = $users->pluck('id');
         }
@@ -192,7 +190,7 @@ class DistressSignalController extends Controller
             $d_signals = DistressSignal::selectRaw("distress_signals.id AS d_signal_id, distress_signals.user_id, stage_id, IFNULL(cnt,0) AS cnt_guest,DATEDIFF(now(),distress_signals.created_at) AS elapsed_days")
                 ->leftjoin('guests', 'distress_signals.id', '=', 'guests.distress_signal_id')
                 ->leftjoin($sub_query_guest_cnt, 'distress_signals.id', '=', 'sq_cnt_guests.distress_signal_id')
-                ->whereNot('distress_signals.user_id', $usersID)
+                ->whereNotIn('distress_signals.user_id', $usersID)
                 ->where(function ($query) use ($request) {
                     $query->where('guests.user_id', '!=', $request->user_id)    // 自身がゲストとして参加していない
                     ->orWhere('guests.user_id', '=', null);                     // まだゲストが存在しない
@@ -204,7 +202,6 @@ class DistressSignalController extends Controller
                 ->having('cnt_guest', '<', self::MAX_GUEST_CNT)
                 ->limit(self::MAX_DISTRESS_SIGNAL - $d_signal_cnt)
                 ->get()->toArray();
-
             if (!empty($response_d_signals)) {
                 $response_d_signals = array_merge($response_d_signals, $d_signals);
             } else {

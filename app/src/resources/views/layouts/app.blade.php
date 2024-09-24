@@ -46,6 +46,8 @@
                             <li><a class="dropdown-item" href="{{ route('logs.follow')}}">フォローログ一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('logs.item')}}">アイテムログ一覧</a></li>
                             <li><a class="dropdown-item" href="{{ route('logs.mail')}}">メールログ一覧</a></li>
+                            <li><a class="dropdown-item" href="{{ route('logs.stageresult')}}">ステージリザルト一覧</a>
+                            </li>
                         </ul>
                     </div>
                 </li>

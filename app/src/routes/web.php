@@ -58,6 +58,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             Route::get('/item', 'item')->name('item');
             // メールログ一覧表示
             Route::get('/mail', 'mail')->name('mail');
+            // ステージリザルト一覧表示
+            Route::get('/stageresult', 'stageresult')->name('stageresult');
         });
 
     // フォローログ一覧表示(検索用)
@@ -66,6 +68,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
     Route::get('logs/item/{id?}', [LogsController::class, 'item'])->name('logs.item.show');
     // メールログ一覧表示(検索用)
     Route::get('logs/mail/{id?}', [LogsController::class, 'mail'])->name('logs.mail.show');
+    // ステージリザルト一覧表示(検索用)
+    Route::get('logs/stageresult/{id?}', [LogsController::class, 'stageresult'])->name('logs.stageresult.show');
 
 
     // [ 救難信号データ ] ##########################################################################

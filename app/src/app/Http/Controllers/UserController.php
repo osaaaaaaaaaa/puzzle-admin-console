@@ -172,19 +172,23 @@ class UserController
     public function achievement(Request $request)
     {
         // モデルを取得する
-        $user_achievements = UserAchievement::where('user_id', '=', $request->id)->paginate(10);
         $user = User::find($request->id);
 
-        for ($i = 0; $i < count($user_achievements); $i++) {
-            // アチーブメントマスタを取得
-            $achievement = Achievement::find($user_achievements[$i]->achievement_id);
+        if (!empty($user)) {
+            $user_achievements = UserAchievement::where('user_id', '=', $request->id)->paginate(10);
+            $user_achievements->appends(['id' => $request->id]);
 
-            // 条件値に達しているかどうかチェック
-            if (!empty($achievement)) {
-                if ($achievement->achieved_val <= $user_achievements[$i]->progress_val) {
-                    $user_achievements[$i]->is_achieved = 1;
-                } else {
-                    $user_achievements[$i]->is_achieved = 0;
+            for ($i = 0; $i < count($user_achievements); $i++) {
+                // アチーブメントマスタを取得
+                $achievement = Achievement::find($user_achievements[$i]->achievement_id);
+
+                // 条件値に達しているかどうかチェック
+                if (!empty($achievement)) {
+                    if ($achievement->achieved_val <= $user_achievements[$i]->progress_val) {
+                        $user_achievements[$i]->is_achieved = 1;
+                    } else {
+                        $user_achievements[$i]->is_achieved = 0;
+                    }
                 }
             }
         }

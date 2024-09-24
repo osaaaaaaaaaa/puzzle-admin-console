@@ -43,13 +43,10 @@
                                 <td>
                                     @switch($data->pivot->option_id)
                                         @case(1)
-                                            受信メール
+                                            アチーブメント報酬
                                             @break
                                         @case(2)
-                                            ステージクリア報酬
-                                            @break
-                                        @case(3)
-                                            アチーブメント報酬
+                                            メール受け取り
                                             @break
                                     @endswitch
                                 </td>

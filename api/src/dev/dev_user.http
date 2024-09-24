@@ -3,7 +3,7 @@
 //************************************************************************************
 
 ### ユーザー情報取得
-GET http://localhost:8000/api/users/show?user_id=10
+GET http://localhost:8000/api/users/show?user_id=1
 Accept: application/json
 
 ### 所持アイテムリスト取得
@@ -11,11 +11,11 @@ GET http://localhost:8000/api/users/item/show?user_id=1&type=6
 Accept: application/json
 
 ### フォローリスト取得
-GET http://localhost:8000/api/users/follow/show?user_id=1
+GET https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/follow/show?user_id=3
 Accept: application/json
 
 ### おすすめのユーザーリスト取得
-GET http://localhost:8000/api/users/recommended/show?user_id=21
+GET https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/recommended/show?user_id=3
 Accept: application/json
 
 ### 受信メールリスト取得
@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
 ### ステージリザルト取得
-GET https://localhost:8000/api/users/stage/result/show?user_id=1
+GET http://localhost:8000/api/users/stage/result/show?user_id=1
 Accept: application/json
 
 //**********************************************************
@@ -47,12 +47,12 @@ Accept: application/json
 //**********************************************************
 
 ### ユーザー情報登録
-POST https://localhost:8000/api/users/store
+POST http://localhost:8000/api/users/store
 Content-Type: application/json
 Accept: application/json
 
 {
-    "name": "APITEST"
+    "name": "N2"
 }
 
 ### ユーザー情報更新
@@ -86,7 +86,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "user_id": 11,
+    "user_id": 5,
     "following_user_id": 3
 }
 
@@ -121,7 +121,7 @@ Accept: application/json
 }
 
 ### ステージクリア処理
-POST https://api-tikokukaihi.japaneast.cloudapp.azure.com/api/users/stage/clear/update
+POST https://localhost:8000/api/users/stage/clear/update
 Content-Type: application/json
 Accept: application/json
 

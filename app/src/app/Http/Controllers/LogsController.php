@@ -55,4 +55,20 @@ class LogsController extends Controller
 
         return view('logs.mail', ['user' => $user, 'logs' => $logs ?? null]);
     }
+
+    // ステージリザルト情報
+    public function stageresult(Request $request)
+    {
+        // モデルを取得する
+        $user = User::find($request->id);
+
+        // ユーザーが存在するかどうか
+        if (!empty($user)) {
+            // リレーション
+            $logs = $user->stageresult()->paginate(10);
+            $logs->appends(['id' => $request->id]);
+        }
+
+        return view('logs.stageresult', ['user' => $user, 'logs' => $logs ?? null]);
+    }
 }

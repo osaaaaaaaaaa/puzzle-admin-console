@@ -57,6 +57,11 @@
                 <h4 class="fw-normal">メールログ一覧</h4>
                 <p><a class="btn btn-primary" href="{{ route('logs.mail')}}">View details »</a></p>
             </div>
+            <div class="col-md-2 border rounded-3 bg-body-tertiary">
+                <i class="bi bi-database home-icon"></i>
+                <h4 class="fw-normal">ステージリザルト一覧</h4>
+                <p><a class="btn btn-primary" href="{{ route('logs.stageresult')}}">View details »</a></p>
+            </div>
         </div>
         <br>
         <!--救難信号データ管理 **** -->
