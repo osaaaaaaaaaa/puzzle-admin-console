@@ -3,8 +3,8 @@ use admin_console;
 
 show tables;
 SELECT * FROM stage_results where user_id = 21;
-SELECT * FROM users WHERE id = 23;
-UPDATE users SET stage_id = 30 WHERE id = 23;
+SELECT * FROM users;
+UPDATE users SET stage_id = 30 WHERE id = 27;
 UPDATE items SET name = 'よく蹴られる' WHERE id = 39;
 
 # 自身が発信していない && 自身が参加していない && ゲストの参加人数が2人未満の救難信号をランダムに10件まで取得
