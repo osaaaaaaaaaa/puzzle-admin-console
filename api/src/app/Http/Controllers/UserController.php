@@ -25,6 +25,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
@@ -85,14 +86,13 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string'],
         ]);
-
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
         try {
             // トランザクション処理
-            $user = DB::transaction(function () use ($request) {
+            $response = DB::transaction(function () use ($request) {
                 // 登録処理
                 $user = User::create([
                     'name' => $request->name,
@@ -100,6 +100,9 @@ class UserController extends Controller
                     'stage_id' => 1,
                     'icon_id' => 1,
                 ]);
+
+                // APIトークンを発行する
+                $token = $user->createToken($request->name)->plainTextToken;
 
                 // 初期アイテム取得
                 $items = Item::whereIn('id', [1, 3])
@@ -125,9 +128,10 @@ class UserController extends Controller
                     ]);
                 }
 
-                return $user;
+                return ['user_id' => $user->id, 'token' => $token];
             });
-            return response()->json(['user_id' => $user->id]);
+
+            return response()->json($response);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -138,7 +142,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['int', 'min:1'],
             'name' => ['required', 'string'],
             'title_id' => ['required', 'integer'],
             'stage_id' => ['required', 'integer'],
@@ -149,7 +152,7 @@ class UserController extends Controller
         }
 
         // 存在チェック
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
         $item = Item::where('id', '=', $request->title_id)->where('type', '=', 2)->first();
         if ($request->title_id != 0 && empty($item)) {
             // ID指定が0以外 && 存在しない場合
@@ -211,7 +214,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['required', 'int', 'min:1'],
             'item_id' => ['required', 'int', 'min:1'],
             'option_id' => ['required', 'int', 'min:1'],
             'allie_amount' => ['required', 'int'],
@@ -221,7 +223,7 @@ class UserController extends Controller
         }
 
         // 指定したユーザーが存在するかどうか
-        User::findOrFail($request->user_id);
+        User::findOrFail($request->user()->id);
 
         try {
             // トランザクション処理
@@ -229,7 +231,7 @@ class UserController extends Controller
 
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $user_item = UserItem::firstOrCreate(
-                    ['user_id' => $request->user_id, 'item_id' => $request->item_id],
+                    ['user_id' => $request->user()->id, 'item_id' => $request->item_id],
                     // 検索する条件値
                     ['amount' => 0]   // 生成するときに代入するカラム
                 );
@@ -244,7 +246,7 @@ class UserController extends Controller
 
                 // ログテーブル登録処理
                 ItemLogs::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'item_id' => $request->item_id,
                     'option_id' => $request->option_id,
                     'allie_count' => $request->allie_amount
@@ -380,7 +382,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['required', 'int'],
             'following_user_id' => ['required', 'int'],
         ]);
         if ($validator->fails()) {
@@ -388,7 +389,7 @@ class UserController extends Controller
         }
 
         // ユーザーが存在するかどうか
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
         User::findOrFail($request->following_user_id);
 
         // フォローしている人数が上限に達していないかチェック
@@ -399,7 +400,7 @@ class UserController extends Controller
         }
 
         // フォロー済みかどうか
-        $frag = FollowingUser::where('user_id', '=', $request->user_id)->where("following_user_id", "=",
+        $frag = FollowingUser::where('user_id', '=', $request->user()->id)->where("following_user_id", "=",
             $request->following_user_id)->exists();
         if ($frag) {
             abort(400);
@@ -410,13 +411,13 @@ class UserController extends Controller
             DB::transaction(function () use ($request) {
                 // 登録処理
                 FollowingUser::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'following_user_id' => $request->following_user_id,
                 ]);
 
                 // ログテーブル登録処理
                 FollowLogs::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'target_user_id' => $request->following_user_id,
                     'action' => 1
                 ]);
@@ -433,7 +434,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['required', 'int'],
             'following_user_id' => ['required', 'int'],
         ]);
         if ($validator->fails()) {
@@ -441,18 +441,18 @@ class UserController extends Controller
         }
 
         // 対象のユーザーが存在するかどうか
-        User::findOrFail($request->user_id);
+        User::findOrFail($request->user()->id);
 
         try {
             // トランザクション処理
             DB::transaction(function () use ($request) {
                 // 削除処理
-                FollowingUser::where('user_id', '=', $request->user_id)->where('following_user_id', '=',
+                FollowingUser::where('user_id', '=', $request->user()->id)->where('following_user_id', '=',
                     $request->following_user_id)->delete();
 
                 // ログテーブル登録処理
                 FollowLogs::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'target_user_id' => $request->following_user_id,
                     'action' => 0
                 ]);
@@ -513,7 +513,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['required', 'int'],
             'user_mail_id' => ['required', 'int']
         ]);
         if ($validator->fails()) {
@@ -521,7 +520,7 @@ class UserController extends Controller
         }
 
         // 指定したユーザーが存在するかどうか
-        User::findOrFail($request->user_id);
+        User::findOrFail($request->user()->id);
 
         // レコード存在チェック・受け取り済みかどうかチェック
         $userMail = UserMail::findOrFail($request->user_mail_id);
@@ -544,7 +543,7 @@ class UserController extends Controller
 
                     // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                     $userItem = UserItem::firstOrCreate(
-                        ['user_id' => $request->user_id, 'item_id' => $item->item_id],
+                        ['user_id' => $request->user()->id, 'item_id' => $item->item_id],
                         // 検索する条件値
                         ['amount' => 0]   // 生成するときに代入するカラム
                     );
@@ -559,7 +558,7 @@ class UserController extends Controller
 
                 // ログテーブル登録処理
                 MailLogs::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'mail_id' => $request->user_mail_id,
                     'action' => 1
                 ]);
@@ -586,7 +585,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['required', 'int'],
             'user_mail_id' => ['required', 'int'],
         ]);
         if ($validator->fails()) {
@@ -594,17 +592,18 @@ class UserController extends Controller
         }
 
         // 対象のユーザーが存在するかどうか
-        User::findOrFail($request->user_id);
+        User::findOrFail($request->user()->id);
 
         try {
             // トランザクション処理
             DB::transaction(function () use ($request) {
                 // 削除処理
-                UserMail::where('user_id', '=', $request->user_id)->where('id', '=', $request->user_mail_id)->delete();
+                UserMail::where('user_id', '=', $request->user()->id)->where('id', '=',
+                    $request->user_mail_id)->delete();
 
                 // ログテーブル登録処理
                 MailLogs::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'mail_id' => $request->user_mail_id,
                     'action' => 0
                 ]);
@@ -643,7 +642,6 @@ class UserController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['int', 'required'],       // ユーザーID
             'stage_id' => ['int', 'required'],      // ステージID
             'is_medal1' => ['boolean', 'required'], // メダル１を取得したかどうか
             'is_medal2' => ['boolean', 'required'], // メダル２を取得したかどうか
@@ -655,7 +653,7 @@ class UserController extends Controller
         }
 
         // ユーザーの存在チェック
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
 
         try {
             // トランザクション処理
@@ -663,7 +661,7 @@ class UserController extends Controller
 
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $stage_result = StageResult::firstOrCreate(
-                    ['user_id' => $request->user_id, 'stage_id' => $request->stage_id],    // 検索する条件値
+                    ['user_id' => $request->user()->id, 'stage_id' => $request->stage_id],    // 検索する条件値
                     [
                         'is_medal1' => $request->is_medal1,
                         'is_medal2' => $request->is_medal2,
@@ -778,5 +776,33 @@ class UserController extends Controller
         array_multisort($totalArray, SORT_DESC, $results);
 
         return response()->json($results);
+    }
+
+    // トークン生成処理
+    public function createToken(Request $request)
+    {
+        // バリデーション
+        $validator = Validator::make($request->all(), [
+            'user_id' => ['required', 'int']
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $token = PersonalAccessToken::where('tokenable_id', '=', $request->user_id)->first();
+        if ($token == null) {
+            try {
+                // トランザクション処理
+                $token = DB::transaction(function () use ($request) {
+                    $user = User::findOrFail($request->user_id);
+                    return $user->createToken($user->name)->plainTextToken;
+                });
+                return response()->json(['token' => $token]);
+            } catch (Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+        } else {
+            abort(400);
+        }
     }
 }

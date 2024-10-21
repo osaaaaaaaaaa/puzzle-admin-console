@@ -18,9 +18,9 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/store
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 2,
     "stage_id": 8
 }
 
@@ -28,6 +28,7 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
     "d_signal_id": 1
@@ -37,6 +38,7 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/destroy
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
     "d_signal_id": 3
@@ -50,10 +52,10 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/guest/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078dafs
 
 {
     "d_signal_id": 4,
-    "user_id": 21,
     "position": "TEST",
     "vector": "TEST"
 }
@@ -62,10 +64,11 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/guest/destroy
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
     "d_signal_id": 2,
-    "user_id": 1
+    "destroy_user_id": 1
 }
 
 ### リプレイ情報取得
@@ -76,6 +79,7 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/replay/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
     "d_signal_id": 4,
@@ -94,8 +98,8 @@ Accept: application/json
 POST http://localhost:8000/api/distress_signals/reward/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "d_signal_id": 2,
-    "user_id": 1
+    "d_signal_id": 2
 }

@@ -232,7 +232,6 @@ class DistressSignalController extends Controller
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['int', 'min:1', 'required'],
             'stage_id' => ['int', 'min:1', 'required'],
         ]);
         if ($validator->fails()) {
@@ -240,10 +239,10 @@ class DistressSignalController extends Controller
         }
 
         // ユーザーの存在チェック
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
 
         // 救難信号を募集した情報を取得
-        $recruitments = DistressSignal::where('user_id', '=', $request->user_id)->get();
+        $recruitments = DistressSignal::where('user_id', '=', $request->user()->id)->get();
 
         // 募集した数(履歴)が上限に達していないかチェック
         if (self::MAX_DISTRESS_SIGNAL_HISTORY <= count($recruitments)) {
@@ -252,7 +251,7 @@ class DistressSignalController extends Controller
 
         // 募集する際に、同時に救難信号を募集する数が上限に達していないかチェック
         $current_recruitments = $recruitments->where('action', '=', 0)->count();
-        $add_distress_signals = UserItem::where('user_id', '=', $request->user_id)
+        $add_distress_signals = UserItem::where('user_id', '=', $request->user()->id)
             ->where('item_id', '=', self::ITEM_ADD_DISTRESS_SIGNALS_ID)
             ->pluck('amount')->first();
         $add_distress_signals = empty($add_distress_signals) ? 0 : $add_distress_signals;   // 上限の拡張値を取得
@@ -261,7 +260,7 @@ class DistressSignalController extends Controller
         }
 
         // 重複した救難信号(ゲームクリア済みは除く)が存在する場合はエラー
-        $is_d_signal = DistressSignal::where('user_id', '=', $request->user_id)
+        $is_d_signal = DistressSignal::where('user_id', '=', $request->user()->id)
             ->where('stage_id', '=', $request->stage_id)
             ->where('action', '=', 0)
             ->exists();
@@ -274,7 +273,7 @@ class DistressSignalController extends Controller
             $d_signal = DB::transaction(function () use ($request) {
                 // 登録処理
                 return DistressSignal::create([
-                    'user_id' => $request->user_id,
+                    'user_id' => $request->user()->id,
                     'stage_id' => $request->stage_id,
                     'action' => 0
                 ]);
@@ -409,7 +408,6 @@ class DistressSignalController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
-            'user_id' => ['int', 'min:1', 'required'],
             'position' => ['required'],
             'vector' => ['required'],
         ]);
@@ -418,7 +416,7 @@ class DistressSignalController extends Controller
         }
 
         // ユーザーの存在チェック
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
 
         // 既にゲームクリアしている場合はエラーを返す
         $d_signal = DistressSignal::findOrFail($request->d_signal_id);
@@ -427,11 +425,11 @@ class DistressSignalController extends Controller
         }
 
         // ゲスト登録するのかどうか取得(まだレコードが存在しない場合は登録)
-        $exists = Guest::where('user_id', '=', $request->user_id)
+        $exists = Guest::where('user_id', '=', $request->user()->id)
             ->where('distress_signal_id', '=', $request->d_signal_id)->exists();
         if (!$exists) {
             // 参加した数(履歴)が上限に達していないかチェック
-            $participants = Guest::where('user_id', '=', $request->user_id)->get();
+            $participants = Guest::where('user_id', '=', $request->user()->id)->get();
             if (self::MAX_DISTRESS_SIGNAL_HISTORY <= count($participants)) {
                 return response()->json(['error' => "参加した履歴の数が上限に達しています\n\n履歴を削除してください"],
                     400);
@@ -440,7 +438,7 @@ class DistressSignalController extends Controller
             // 参加する際に、同時に救難信号に参加している数が上限に達していないかチェック(未クリアの救難信号に参加している数を取得する)
             $current_recruitments = DistressSignal::whereIn('id', $participants->pluck('distress_signal_id'))
                 ->where('action', '=', 0)->count();
-            $add_distress_signals = UserItem::where('user_id', '=', $request->user_id)
+            $add_distress_signals = UserItem::where('user_id', '=', $request->user()->id)
                 ->where('item_id', '=', self::ITEM_ADD_DISTRESS_SIGNALS_ID)
                 ->pluck('amount')->first();
             $add_distress_signals = empty($add_distress_signals) ? 0 : $add_distress_signals;   // 上限の拡張値を取得
@@ -460,7 +458,7 @@ class DistressSignalController extends Controller
             DB::transaction(function () use ($request) {
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $guest = Guest::firstOrCreate(
-                    ['user_id' => $request->user_id, 'distress_signal_id' => $request->d_signal_id],    // 検索する条件値
+                    ['user_id' => $request->user()->id, 'distress_signal_id' => $request->d_signal_id],    // 検索する条件値
                     [
                         'position' => $request->position,
                         'vector' => $request->vector,
@@ -484,7 +482,7 @@ class DistressSignalController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
-            'user_id' => ['int', 'min:1', 'required'],
+            'destroy_user_id' => ['int', 'min:1', 'required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -494,7 +492,7 @@ class DistressSignalController extends Controller
         DistressSignal::where('id', '=', $request->d_signal_id)->firstOrFail();
 
         // 指定した救難信号に指定したゲストが存在するかチェック
-        $guest = Guest::where('user_id', '=', $request->user_id)
+        $guest = Guest::where('user_id', '=', $request->destroy_user_id)
             ->where('distress_signal_id', '=', $request->d_signal_id)
             ->firstOrFail();
 
@@ -656,7 +654,6 @@ class DistressSignalController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'd_signal_id' => ['int', 'min:1', 'required'],
-            'user_id' => ['int', 'min:1', 'required'],
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -669,7 +666,7 @@ class DistressSignalController extends Controller
         }
 
         // ゲストの存在チェック
-        $guest = Guest::where('user_id', '=', $request->user_id)
+        $guest = Guest::where('user_id', '=', $request->user()->id)
             ->where('distress_signal_id', '=', $request->d_signal_id)
             ->where('is_rewarded', '=', 0)
             ->firstOrFail();
@@ -680,7 +677,7 @@ class DistressSignalController extends Controller
 
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $userItem = UserItem::firstOrCreate(
-                    ['user_id' => $request->user_id, 'item_id' => self::ITEM_GUEST_REWARD_ID],
+                    ['user_id' => $request->user()->id, 'item_id' => self::ITEM_GUEST_REWARD_ID],
                     // 検索する条件値
                     ['amount' => 0]   // 生成するときに代入するカラム
                 );

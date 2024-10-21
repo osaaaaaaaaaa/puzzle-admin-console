@@ -10,9 +10,9 @@ Accept: application/json
 POST http://localhost:8000/api/users/achievements/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 21,
     "type": 1,
     "allie_val": 1
 }
@@ -21,8 +21,8 @@ Accept: application/json
 POST http://localhost:8000/api/users/achievements/receive
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "achievement_id": 32,
-    "user_id": 21
+    "achievement_id": 32
 }

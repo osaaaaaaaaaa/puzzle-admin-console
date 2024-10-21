@@ -85,13 +85,11 @@ class AchievementController extends Controller
         return response()->json($response);
     }
 
-
     // アチーブメント達成状況更新
     public function update(Request $request)
     {
         // バリデーション
         $validator = Validator::make($request->all(), [
-            'user_id' => ['int', 'min:1', 'required'],  // ユーザーID
             'type' => ['int', 'min:1', 'required'],     // アチーブメントの種類
             'allie_val' => ['int', 'required']          // 加減算する値(typeが2のときは0を指定)
         ]);
@@ -105,7 +103,7 @@ class AchievementController extends Controller
         }
 
         // ユーザーの存在チェック
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
 
         // typeを指定してアチーブメントマスタ取得
         $achievements = Achievement::where('type', $request->type)->get();
@@ -126,7 +124,7 @@ class AchievementController extends Controller
 
                     // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                     $user_achievement = UserAchievement::firstOrCreate(
-                        ['user_id' => $request->user_id, 'achievement_id' => $achievement->id],
+                        ['user_id' => $request->user()->id, 'achievement_id' => $achievement->id],
                         // 検索する条件値
                         ['progress_val' => 0, 'is_receive_item' => 0]   // 生成するときに代入するカラム
                     );
@@ -148,7 +146,7 @@ class AchievementController extends Controller
 
                             // 自動で報酬受け取り
                             $userItem = UserItem::firstOrCreate(
-                                ['user_id' => $request->user_id, 'item_id' => $achievement->item_id],
+                                ['user_id' => $request->user()->id, 'item_id' => $achievement->item_id],
                                 // 検索する条件値
                                 ['amount' => 0]
                             );
@@ -176,14 +174,13 @@ class AchievementController extends Controller
         // バリデーション
         $validator = Validator::make($request->all(), [
             'achievement_id' => ['required', 'int'],
-            'user_id' => ['required', 'int']
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
         // 指定したユーザーが存在するかどうか
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail($request->user()->id);
 
         // アチーブメント存在チェック
         $achievement = Achievement::where('id', '=', $request->achievement_id)->firstOrFail();
@@ -194,7 +191,7 @@ class AchievementController extends Controller
 
         // ユーザーアチーブメントが受け取り済みかどうかチェック
         $userAchievement = UserAchievement::firstOrCreate(
-            ['user_id' => $request->user_id, 'achievement_id' => $request->achievement_id],
+            ['user_id' => $request->user()->id, 'achievement_id' => $request->achievement_id],
             // 検索する条件値
             ['progress_val' => $total_point, 'is_receive_item' => 0]   // 生成するときに代入するカラム
         );
@@ -218,7 +215,7 @@ class AchievementController extends Controller
                 $item['amount'] = $achievement->item_amount;
                 // 条件値に一致するレコードを検索して返す、存在しなければ新しく生成して返す
                 $userItem = UserItem::firstOrCreate(
-                    ['user_id' => $request->user_id, 'item_id' => $item->id],
+                    ['user_id' => $request->user()->id, 'item_id' => $item->id],
                     // 検索する条件値
                     ['amount' => 0]   // 生成するときに代入するカラム
                 );

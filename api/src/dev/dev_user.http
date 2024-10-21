@@ -52,29 +52,29 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "name": "N2"
+    "name": "TEST2"
 }
 
 ### ユーザー情報更新
-POST https://localhost:8000/api/users/update
+POST http://localhost:8000/api/users/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 6,
-    "name": "かいと",
+    "name": "IEEI",
     "title_id": 0,
     "stage_id": 0,
-    "icon_id": 1
+    "icon_id": 3
 }
 
 ### 所持アイテム更新
 POST http://localhost:8000/api/users/item/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 16,
     "item_id": 34,
     "option_id": 1,
     "allie_amount": 1
@@ -84,9 +84,9 @@ Accept: application/json
 POST http://localhost:8000/api/users/follow/store
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 5,
     "following_user_id": 3
 }
 
@@ -94,9 +94,9 @@ Accept: application/json
 POST http://localhost:8000/api/users/follow/destroy
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 11,
     "following_user_id": 5
 }
 
@@ -104,9 +104,9 @@ Accept: application/json
 POST http://localhost:8000/api/users/mail/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 21,
     "user_mail_id": 11
 }
 
@@ -114,9 +114,9 @@ Accept: application/json
 POST http://localhost:8000/api/users/mail/destroy
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 3,
     "user_mail_id": 1
 }
 
@@ -124,12 +124,21 @@ Accept: application/json
 POST https://localhost:8000/api/users/stage/clear/update
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 2|tozIbA2o2thyyH6taiFsXeZuz3Ni6vof2DuXx0wF49078daf
 
 {
-    "user_id": 1,
     "stage_id": 1,
     "is_medal1": 1,
     "is_medal2": 1,
     "time": 34.56,
     "score": 1200
+}
+
+### トークン生成処理
+POST http://localhost:8000/api/users/token/store
+Content-Type: application/json
+Accept: application/json
+
+{
+    "user_id": 4
 }

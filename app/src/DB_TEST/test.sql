@@ -40,15 +40,8 @@ LEFT JOIN user_achievements ON user_achievements.achievement_id = achievements.i
 AND user_id = 2
 WHERE type = 1 AND (is_achieved = 0 OR is_achieved IS NULL);
 
-# [ アチーブメント更新処理 ] ####################################
-
 # アチーブメントマスタ取得処理
 SELECT * from achievements;
-
-# アチーブメント達成状況取得
-
-
-
 
 explain SELECT achievements.id AS id, progress_val FROM achievements
 LEFT JOIN user_achievements AS ua ON achievements.id = ua.achievement_id
@@ -87,7 +80,3 @@ SELECT * FROM following_users where following_user_id = 2;
 
 # 自分がフォローしているユーザーを取得
 SELECT * FROM following_users WHERE user_id = 1;
-
-# [ ランキング ] ###############################################################
-
-

@@ -21,39 +21,50 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // ユーザー情報取得・登録・更新
             Route::get('/show', 'show')->name('show');
             Route::post('/store', 'store')->name('store');
-            Route::post('/update', 'update')->name('update');
+            Route::post('/update', 'update')->middleware('auth:sanctum')->name('update');
 
             // フォローリスト取得・登録・解除
             Route::get('/follow/show', 'showFollow')->name('follow.show');
-            Route::post('/follow/store', 'storeFollow')->name('follow.store');
-            Route::post('/follow/destroy', 'destroyFollow')->name('follow.destroy');
+            Route::post('/follow/store', 'storeFollow')
+                ->middleware('auth:sanctum')->name('follow.store');
+            Route::post('/follow/destroy', 'destroyFollow')
+                ->middleware('auth:sanctum')->name('follow.destroy');
 
             // おすすめのユーザーリスト取得
             Route::get('/recommended/show', 'showRecommendedUser')->name('recommended.show');
 
             // 所持アイテムリスト取得・更新
             Route::get('/item/show', 'showItem')->name('item.show');
-            Route::post('/item/update', 'updateItem')->name('item.update');
+            Route::post('/item/update', 'updateItem')
+                ->middleware('auth:sanctum')->name('item.update');
 
             // メールリスト取得・開封・削除
             Route::get('/mail/show', 'showMail')->name('mail.show');
-            Route::post('/mail/update', 'updateMail')->name('mail.update');
-            Route::post('/mail/destroy', 'destroyMail')->name('mail.destroy');
+            Route::post('/mail/update', 'updateMail')
+                ->middleware('auth:sanctum')->name('mail.update');
+            Route::post('/mail/destroy', 'destroyMail')
+                ->middleware('auth:sanctum')->name('mail.destroy');
 
             // ステージリザルト取得・更新
-            Route::get('/stage/result/show', 'showStageResult')->name('stage.result.show');
-            Route::post('/stage/clear/update', 'updateStageClear')->name('stage.clear.update');
+            Route::get('/stage/result/show', 'showStageResult')
+                ->middleware('auth:sanctum')->name('stage.result.show');
+            Route::post('/stage/clear/update', 'updateStageClear')
+                ->middleware('auth:sanctum')->name('stage.clear.update');
 
             // ランキング取得・フォロー内でのランキング取得
             Route::get('/ranking/show', 'showRanking')->name('ranking.show');
             Route::get('/follow/ranking/show', 'showFollowRanking')->name('follow.ranking.index');
+
+            // アクセストークン生成処理
+            Route::post('/token/store', 'createToken')->name('token.store');
         });
 
     // アチーブメントの達成状況更新
-    Route::post('users/achievements/update', [AchievementController::class, 'update'])->name('achievements.update');
+    Route::post('users/achievements/update', [AchievementController::class, 'update'])
+        ->middleware('auth:sanctum')->name('achievements.update');
     // アチーブメント報酬受け取り
-    Route::post('users/achievements/receive',
-        [AchievementController::class, 'receive'])->name('achievements.receive');
+    Route::post('users/achievements/receive', [AchievementController::class, 'receive'])
+        ->middleware('auth:sanctum')->name('achievements.receive');
 
     // [ 救難信号 ] #####################################################################################################
 
@@ -70,11 +81,14 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // 救難信号をランダムに取得
             Route::get('/show', 'show')->name('show');
             // 救難信号の登録
-            Route::post('/store', 'store')->name('store');
+            Route::post('/store', 'store')
+                ->middleware('auth:sanctum')->name('store');
             // 救難信号の更新
-            Route::post('/update', 'update')->name('update');
+            Route::post('/update', 'update')
+                ->middleware('auth:sanctum')->name('update');
             // 救難信号削除
-            Route::post('/destroy', 'destroy')->name('destroy');
+            Route::post('/destroy', 'destroy')
+                ->middleware('auth:sanctum')->name('destroy');
 
             //************************
             // ゲスト関連のAPI
@@ -82,11 +96,14 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // ゲスト取得
             Route::get('/guest/show', 'showGuest')->name('guest.show');
             // ゲスト更新(参加・配置情報更新)
-            Route::post('/guest/update', 'updateGuest')->name('guest.update');
+            Route::post('/guest/update', 'updateGuest')
+                ->middleware('auth:sanctum')->name('guest.update');
             // ゲスト削除
-            Route::post('/guest/destroy', 'destroyGuest')->name('guest.destroy');
+            Route::post('/guest/destroy', 'destroyGuest')
+                ->middleware('auth:sanctum')->name('guest.destroy');
             // 救難信号の報酬受け取り
-            Route::post('/reward/update', 'claimReward')->name('reward.update');
+            Route::post('/reward/update', 'claimReward')
+                ->middleware('auth:sanctum')->name('reward.update');
 
             //************************
             // リプレイ情報関連のAPI
@@ -94,7 +111,8 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
             // リプレイ情報取得
             Route::get('/replay/show', 'showReplay')->name('replay.show');
             // リプレイ情報登録
-            Route::post('/replay/update', 'updateReplay')->name('replay.update');
+            Route::post('/replay/update', 'updateReplay')
+                ->middleware('auth:sanctum')->name('replay.update');
 
             //******************************************
             // 救難信号の募集[ホスト]・参加ログ[ゲスト]を取得
