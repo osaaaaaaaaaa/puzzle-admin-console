@@ -46,8 +46,7 @@ Route::middleware([NoCacheMiddleware::class])->group(function () {
                 ->middleware('auth:sanctum')->name('mail.destroy');
 
             // ステージリザルト取得・更新
-            Route::get('/stage/result/show', 'showStageResult')
-                ->middleware('auth:sanctum')->name('stage.result.show');
+            Route::get('/stage/result/show', 'showStageResult')->name('stage.result.show');
             Route::post('/stage/clear/update', 'updateStageClear')
                 ->middleware('auth:sanctum')->name('stage.clear.update');
 

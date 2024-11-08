@@ -3,7 +3,7 @@
 //************************************************************************************
 
 ### ユーザー情報取得
-GET http://localhost:8000/api/users/show?user_id=1
+GET http://localhost:8000/api/users/show?user_id=67
 Accept: application/json
 
 ### 所持アイテムリスト取得
@@ -39,7 +39,7 @@ GET http://localhost:8000/api/users/follow/ranking/show?user_id=1
 Accept: application/json
 
 ### ステージリザルト取得
-GET http://localhost:8000/api/users/stage/result/show?user_id=1
+GET http://localhost:8000/api/users/stage/result/show?user_id=4
 Accept: application/json
 
 //**********************************************************
