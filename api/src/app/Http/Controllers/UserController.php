@@ -702,6 +702,14 @@ class UserController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
+        // 相互フォローのユーザーを取得する
+        $agreementUsers = $user->agreement()->toArray();
+        $userIDArray = array_column($agreementUsers, 'id');
+
+        // フォローしているユーザーを取得する
+        $followUsers = $user->follows()->get()->toArray();
+        $followUserIDArray = array_column($followUsers, 'id');
+
         // ランキング上位の情報を取得する
         $results = StageResult::selectRaw("users.id AS user_id,users.name AS name,IFNULL(items.name,'') AS title,users.stage_id AS stage_id,icon_id,SUM(score) AS score")
             ->join('users', 'users.id', '=', 'stage_results.user_id')
@@ -714,14 +722,10 @@ class UserController extends Controller
         // 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($results); $i++) {
             // 相互フォローかどうかの判定処理
-            $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
-                ->where('following_user_id', '=', $user->id)->exists();
-            $results[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+            $results[$i]['is_agreement'] = in_array($results[$i]['user_id'], $userIDArray);
 
             // 相手をフォローしているかどうか取得
-            $isFollow = FollowingUser::where('user_id', '=', $request->user_id)
-                ->where('following_user_id', '=', $results[$i]['user_id'])->exists();
-            $results[$i]['is_follow'] = $isFollow === true ? 1 : 0;
+            $results[$i]['is_follow'] = in_array($results[$i]['user_id'], $followUserIDArray);;
         }
 
         return response()->json($results);
@@ -732,6 +736,9 @@ class UserController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
+        // 相互フォローのユーザーを取得する
+        $agreementUsers = $user->agreement()->toArray();
+        $userIDArray = array_column($agreementUsers, 'id');
 
         // ユーザーのリザルトを取得する
         $userFrag = StageResult::where('user_id', '=', $request->user_id)->exists();
@@ -756,14 +763,12 @@ class UserController extends Controller
             ->orderBy('score', 'desc')
             ->limit(100)
             ->get()
-            ->toArray();    // 取得するときに配列に変換する
+            ->toArray();
 
         // 相互フォローかどうかの情報を格納する
         for ($i = 0; $i < count($results); $i++) {
             // 相互フォローかどうかの判定処理
-            $isFollow = FollowingUser::where('user_id', '=', $results[$i]['user_id'])
-                ->where('following_user_id', '=', $user->id)->exists();
-            $results[$i]['is_agreement'] = $isFollow === true ? 1 : 0;
+            $results[$i]['is_agreement'] = in_array($results[$i]['user_id'], $userIDArray);
         }
 
         if ($userFrag) {

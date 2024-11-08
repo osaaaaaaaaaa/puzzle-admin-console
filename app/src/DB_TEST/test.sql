@@ -3,7 +3,7 @@ use admin_console;
 
 show tables;
 SELECT * FROM stage_results where user_id = 21;
-SELECT * FROM users;
+SELECT * FROM personal_access_tokens;
 UPDATE users SET stage_id = 30 WHERE id = 27;
 UPDATE items SET name = 'よく蹴られる' WHERE id = 39;
 
