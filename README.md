@@ -1,5 +1,7 @@
 # 遅刻回避    
 
+![Image](https://github.com/user-attachments/assets/7a3bf691-234c-453b-88dc-532a3cd2c994)  
+
 [ 概要 ]  
 ---  
 学校に遅刻しそうな息子を学校へ蹴り飛ばして登校させる、謎解きアクションパズルゲームです。  
