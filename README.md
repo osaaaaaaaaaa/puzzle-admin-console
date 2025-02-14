@@ -6,7 +6,15 @@
 ---  
 学校に遅刻しそうな息子を学校へ蹴り飛ばして登校させる、謎解きアクションパズルゲームです。  
 WebAPIを使用したオンラインゲームとなっています。  
-非同期の協力プレイ(2人～3人まで)が可能です！
+非同期の協力プレイ(2人～3人まで)が可能です！  
+
+[ ストアリンク ]  
+---  
+[ App Store ]  
+https://apps.apple.com/jp/app/%E9%81%85%E5%88%BB%E5%9B%9E%E9%81%BF/id6698862358?l=en-US&itscg=30200&itsct=apps_box_link&mttnsubad=6698862358    
+
+[ Google Play ]  
+https://play.google.com/store/apps/details?id=com.yoshidahcc.TikokuKaihi&pcampaignid=web_share  
 
 [ 管理ツール ]  
 ---
